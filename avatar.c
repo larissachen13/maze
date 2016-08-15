@@ -1,0 +1,1 @@
+// A struct for the avatars within the maze

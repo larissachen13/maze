@@ -1,0 +1,1 @@
+// A structure file to hold the available information about the maze
