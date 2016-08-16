@@ -12,5 +12,12 @@
 
 int main(int argc, char *argv[]){
 
-	mazestruct_t* new_maze = maze_new(1,1,1);
+	mazestruct_t* new_maze = maze_new(10,10,1);
+
+	printf("Number of avatars:%d\n", new_maze->num_avatars);
+	printf("Height: %d, Width: %d\n", new_maze->height, new_maze->width);
+
+	maze_print(new_maze);
+	place_avatar(new_maze, 5,5);
+	maze_print(new_maze);
 }
