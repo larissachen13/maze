@@ -6,7 +6,7 @@
 
 //DEVELOPMENT NOTES
 /*
-* Add in an array to hold the avatar structures for each avatar when needed
+* Add in an array to hold the avatar locations for each avatar when needed
 *
 */
 
@@ -25,6 +25,7 @@ typedef struct spot {
 	bool east;
 	bool west;
 	bool avatar;
+	visited_by int[10];
 } spot_t;
 
 /************************* global types *********************/
@@ -59,6 +60,9 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 				exit(2);
 			}
 			new_spot->avatar = false;
+			for(int i = 0; i < 10; i++){
+				new_spot->visited_by[i] = 0;
+			}
 			new_maze->map[i][j] = new_spot;
 		}
 	}
@@ -94,10 +98,17 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 /**************** maze_print() ****************/
 void maze_print(mazestruct_t *maze){
 
+	printf("   ");
+	for (int i = 0; i < maze->width; i ++){
+		printf("  %-2d ", i);
+	}
+	printf("\n");
+
 	//loop through each row
 	for (int i = 0; i < maze->height; i++){
 
 		//print any north walls
+		printf("   ");
 		for (int j = 0; j < maze->width; j++){
 			if(maze->map[j][i]->north){
 				printf("+---+");
@@ -108,9 +119,10 @@ void maze_print(mazestruct_t *maze){
 			}
 		}
 		printf("\n");
-
+		printf("%-3d", i);
 		//print any east, west walls or avatars
 		for (int j = 0; j < maze->width; j++){
+
 			if(maze->map[j][i]->west){
 				printf("| ");
 			}
@@ -130,7 +142,7 @@ void maze_print(mazestruct_t *maze){
 				printf("  ");
 			}
 		}
-		printf("\n");
+		printf("\n   ");
 
 		//print any south walls
 		for (int j = 0; j < maze->width; j++){
@@ -144,12 +156,61 @@ void maze_print(mazestruct_t *maze){
 		}
 		printf("\n");
 	}
+	printf("\n");
 }
 
 /**************** spot_print() ****************/
 void place_avatar(mazestruct_t *maze, int x, int y){
-	maze->map[x][y]->avatar = true;
+	if(x < maze->width && y < maze->width){
+		maze->map[x][y]->avatar = true;
+	}
+	else{
+		printf("Avatar location is off the maze.\n");
+	}
 }
+
+//1 is north, 3 is east, 0 is west, 2 is south
+
+/**************** insert_wall() ****************/
+void insert_wall(mazestruct_t *maze, int x, int y, int direction){
+
+	if(direction == 0){
+		maze->map[x][y]->west = true;
+	}
+	if(direction == 1){
+		maze->map[x][y]->north = true;
+	}
+	if(direction == 2){
+		maze->map[x][y]->south = true;
+	}
+	if(direction == 3){
+		maze->map[x][y]->east = true;
+	}
+
+}
+
+/**************** visited_spot() ****************/
+void visited_spot(mazestruct_t *maze, int x,y, int avatar_number){
+
+	if(avatar_number < 10 && avatar_number > -1){
+		maze->visited_by[avatar_number] = 1;
+	}
+	else{
+		printf("avatar number is not valid \n");
+	}
+
+}
+
+//dead_spot(x,y)
+
+//get_visited
+
+//check_wall(x,y, direction)
+
+//someone_adjacent(x,y)
+//returns -1 if noone otherwise the direction
+
+//update_location(init x, init y, current x, current y)
 
 
 
