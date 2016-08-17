@@ -10,8 +10,8 @@
 /************* constants ***************/
 #define FIRST_PRIORITY (4)
 #define SECOND_PRIORITY	(3)
-#define THIRD_PRIORITY	(2)
-#define FOURTH_PRIORITY	(1)
+#define THIRD_PRIORITY (2)
+#define BACK_TRACK (1)
 #define DONT_DO_IT (0)
 
 /************** includes ***************/
@@ -40,11 +40,20 @@ void make_move(mazestruct_t *maze, Avatar *avatar) {
 
     //if move failed add a wall to the maze at that spot
     if ((move != NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
-	make_wall(maze, pos, move); //get method from Benji
+	insert_wall(maze, avatar->pos.x, avatar->pos.y, move); 
     }
-    //otherwise update maze with new position and mark the space as visited
+    //otherwise...
     else {
-	update_maze(avatar->fd, avatar->pos); //get method from Benji
+	//update maze with new avatar position
+	place_avatar(maze, avatar->pos.x, avatar->pos.y);
+	//if avatar was forced to backtrack it has reached a dead end
+	if (move == BACK_TRACK) {
+	    dead_spot(old_pos.x, old_pos.y);
+	}
+	//otherwise space hasn't been visited by avatar so update visited list
+	else {
+	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
+	}
     }
 }
 
@@ -81,21 +90,27 @@ static int get_best_move_helper(mazestruct_t maze, XYPos my_pos) {
     int move_rank; //keeps score for the current move
 
     for (int move = M_WEST; i < M_NUM_DIRECTIONS; move++) {
-	//score the move
-	if (next_to_avatar) { //get method from Benji
+	/************* score the move *****************/
+	//if the move results in running into a wall
+	if (check_wall(my_pos.x, my_pos.y, move)) {
+	    move_rank = DONT_DO_IT;
+	}
+	//if the move results in potentially meeting another avatar
+	else if (someone_adjacent(my_pos.x, my_pos.y, move)) { 
 	    move_rank = FIRST_PRIORITY;
 	}
-	else if(neighbor is unvisited) { //get method from Benji
+	//if the move results in potentially visiting an unvisited space
+	else if(!is_visited(my_pos.x, my_pos.y, move)) { 
 	    move_rank = SECOND_PRIORITY;
 	}
-	else if(visited && visitor wasn't me) { //get method from Benji
+	//if the move results in potentially visiting a space visited by 
+	//a different avatar
+	else if(!get_visited(avatar->fd, my_pos.x, my_pos.y, move)) {
 	    move_rank = THIRD_PRIORITY;
 	}
-	else if(neighbor is visited && vistor was me) { //get method from Benji
-	    move_rank = FOURTH_PRIORITY;
-	}
+	//if the move results in visiting a space I have already visited
 	else {
-	    move_rank = DONT_DO_IT;
+	    move_rank = BACK_TRACK;
 	}
 	//check how current move compares to the best_move
 	if (move_rank > best_move) {
