@@ -21,8 +21,8 @@ int recv_init_response(int comm_sock, AM_Message *init_response);
 
 int main (int argc, char* argv[]) {
   char opt;
-  int *n_avatars = NULL;
-  int *difficulty = NULL;
+  int n, d;
+  bool n_flag, d_flag, host_flag;
   char *hostname;
   char *program;
   int comm_sock;
@@ -32,30 +32,31 @@ int main (int argc, char* argv[]) {
   AM_Message init_response;
   int maze_port;
   int maze_width, maze_height;
+  FILE *logfile;
 
 
   // 1. Validate and parse arguments
-  hostname = NULL;
   program = argv[0];
   while ((opt = getopt(argc, argv, "n:d:h:")) != -1) {
     switch (opt)
     {
       case 'n':
-        n_avatars = malloc(sizeof(int));
-        if ((sscanf(optarg, "%d", n_avatars)) != 1) {
+        if ((sscanf(optarg, "%d", &n)) != 1) {
           printf("Usage Error: n_avatars argument needs to be an int\n");
           exit(1);
         }
+        n_flag = true;
         break;
       case 'd':
-        difficulty = malloc(sizeof(int));
-        if ((sscanf(optarg, "%d", difficulty)) != 1) {
+        if ((sscanf(optarg, "%d", &d)) != 1) {
           printf("Usage Error: difficulty argument needs to be an int\n");
           exit(1);
         }
+        d_flag = true;
         break;
       case 'h':
         hostname = optarg;
+        host_flag = true;
         break;
       case '?':
         exit(1);
@@ -63,15 +64,15 @@ int main (int argc, char* argv[]) {
     }
   }
 
-  if (n_avatars == NULL) {
-    printf("Usage Error: Missing number of avatars argument: [-n nAvatars]\n");
+  if (!n_flag) {
+    printf("Usage Error: Missing nAvatars argument: [-n nAvatars]\n");
     exit(1);
   }
-  if (difficulty == NULL) {
+  if (!d_flag) {
     printf("Usage Error: Missing difficulty argument: [-d difficulty]\n");
     exit(1);
   }
-  if (hostname == NULL) {
+  if (!host_flag) {
     printf("Usage Error: Missing hostname argument: [-h hostname]\n");
     exit(1);
   }
@@ -93,9 +94,7 @@ int main (int argc, char* argv[]) {
   memcpy(&server.sin_addr, hostp->h_addr_list[0], hostp->h_length);
 
   // 3. Send initial message to server w/ maze specifics
-  error = send_init_message(*n_avatars, *difficulty, comm_sock, server);
-  free(n_avatars);
-  free(difficulty);
+  error = send_init_message(n, d, comm_sock, server);
   if (error) {
     exit (4);
   }
@@ -108,8 +107,14 @@ int main (int argc, char* argv[]) {
   maze_port = ntohl(init_response.init_ok.MazePort);
   maze_width = ntohl(init_response.init_ok.MazeWidth);
   maze_height = ntohl(init_response.init_ok.MazeHeight);
-
   printf("Port: %d, width: %d, height: %d\n", maze_port, maze_width, maze_height);
+
+  // 5. Create log file
+  const int len = 400; //fix this
+  char filename[len];
+  snprintf(filename, len, "Amazing_%s_%d_%d.log", getenv("User"), n, d);
+  logfile = fopen(filename, "w");
+  fclose(logfile);
 
   close(comm_sock);
 }
