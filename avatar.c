@@ -11,7 +11,7 @@
 #define FIRST_PRIORITY (4)
 #define SECOND_PRIORITY	(3)
 #define THIRD_PRIORITY (2)
-#define BACK_TRACK (1)
+#define HAVE_TO_BACK_TRACK (1)
 #define DONT_DO_IT (0)
 
 /************** includes ***************/
@@ -45,10 +45,11 @@ void make_move(mazestruct_t *maze, Avatar *avatar) {
     //otherwise...
     else {
 	//update maze with new avatar position
-	place_avatar(maze, avatar->pos.x, avatar->pos.y);
+	update_location(maze, old_pos.x, old_pos.y, avatar->pos.x, 
+		avatar->pos.y, avatar->fd);
 	//if avatar was forced to backtrack it has reached a dead end
-	if (move == BACK_TRACK) {
-	    dead_spot(old_pos.x, old_pos.y);
+	if (move == HAVE_TO_BACK_TRACK) {
+	    insert_dead_spot(maze, old_pos.x, old_pos.y);
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
 	else {
@@ -92,25 +93,25 @@ static int get_best_move_helper(mazestruct_t maze, XYPos my_pos) {
     for (int move = M_WEST; i < M_NUM_DIRECTIONS; move++) {
 	/************* score the move *****************/
 	//if the move results in running into a wall
-	if (check_wall(my_pos.x, my_pos.y, move)) {
+	if (check_wall(maze, my_pos.x, my_pos.y, move)) {
 	    move_rank = DONT_DO_IT;
 	}
 	//if the move results in potentially meeting another avatar
-	else if (someone_adjacent(my_pos.x, my_pos.y, move)) { 
+	else if (is_someone_adjacent(maze, my_pos.x, my_pos.y, move)) { 
 	    move_rank = FIRST_PRIORITY;
 	}
 	//if the move results in potentially visiting an unvisited space
-	else if(!is_visited(my_pos.x, my_pos.y, move)) { 
+	else if(!is_visited(maze, my_pos.x, my_pos.y, move)) { 
 	    move_rank = SECOND_PRIORITY;
 	}
 	//if the move results in potentially visiting a space visited by 
 	//a different avatar
-	else if(!get_visited(avatar->fd, my_pos.x, my_pos.y, move)) {
+	else if(!did_x_visit(maze, my_pos.x, my_pos.y, move, avatar->fd)) {
 	    move_rank = THIRD_PRIORITY;
 	}
 	//if the move results in visiting a space I have already visited
 	else {
-	    move_rank = BACK_TRACK;
+	    move_rank = HAVE_TO_BACK_TRACK;
 	}
 	//check how current move compares to the best_move
 	if (move_rank > best_move) {
