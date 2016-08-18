@@ -1,5 +1,5 @@
 /*
- * Avatar.c
+ * avatar.c
  * Name: Benjamin Littlejohn
  * Team: core_dumped_in_a_maze 
  * Date: August 2016
@@ -20,24 +20,46 @@
 #include <stdbool.h>
 #include "avatar.h"
 
+/**************************** global functions *****************************/
 /*
  * Method to move a given avatar  
  * See avatar.h for full description
  */
-void make_move(mazestruct_t *maze, Avatar *avatar) {
+void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock) {
 
-    int move;
-
-    //save current position so we can later check if move was successful
+    //save current position can check later if move was successful
     XYPos old_pos = avatar->pos;
-    //get the best move
-    move = get_best_move(maze, avatar->pos);
-    //send the move to the server
-    send_move(avatar->fd, move);
 
-    //wait for return message signifying move was made
-    wait_for_return_message; //still need to figure out
+    int move = get_best_move(maze, avatar->pos);
+    if (!send_move(avatar->fd, move, comm_sock)) {
+	perror("Error writing avatar %d's move to server.\n", avatar->id);
+    }
 
+    wait_for_response(comm_sock, msg_buff);
+
+    //update avatar position based on response
+    my_avatar->pos = ntohl(msg_buff->Pos[my_avatar->fd]);
+    update_maze(maze, old_pos, move, my_avatar);
+}
+
+/*
+ * Waits until the server sends a message then reads it into the given
+ * 	message buffer
+ *
+ * Caller is responsible for allocating memory for the message buffer and
+ * 	freeing it
+ */
+void wait_for_response(int comm_sock, AM_Message *msg_buff) {
+    if ((read(comm_sock, *msg_buff, sizeof(AM_Message))) < 0) {
+	perror("Error reading message from server.\n");
+    }
+}
+
+/*
+ * Updates the shared map of the maze based on an avatar's last move, former 
+ * 	position, and current positon
+ */
+void update_maze(mazestruct *maze, XYPos old_pos, int move, Avatar *avatar) {
     //if move failed add a wall to the maze at that spot
     if ((move != NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
 	insert_wall(maze, avatar->pos.x, avatar->pos.y, move); 
@@ -58,13 +80,17 @@ void make_move(mazestruct_t *maze, Avatar *avatar) {
     }
 }
 
+/**************************** local functions ******************************/
 /*
  * Determines an avatar's next move using the shared maze knowledge of all the
  * 	avatars and the avatar's current position 
  */
 static int get_best_move(mazestruct_t *maze, XYPos my_pos) {
+
     int best_move;
-    if (we_can_come_together(maze)) { //get method from Benji
+
+    //haven't figured out what to do here so just avoid situation
+    if (false) {
 	best_move = come_together();
     }
     else {
@@ -85,7 +111,7 @@ static int get_best_move(mazestruct_t *maze, XYPos my_pos) {
  *
  * See avatar.h for details on priorities
  */
-static int get_best_move_helper(mazestruct_t maze, XYPos my_pos) {
+static int get_best_move_helper(mazestruct_t *maze, XYPos my_pos) {
 
     int best_move = -1; //stores score of best move so far
     int move_rank; //keeps score for the current move
@@ -122,11 +148,22 @@ static int get_best_move_helper(mazestruct_t maze, XYPos my_pos) {
 }
 
 /*
- * Sends an avatar's move to the server; for now just prints a message
- * Still need to figure out
+ * Sends an avatar's move to the maze server
+ * Returns true if the message was sent sucessfully and false otherwise
  */
-static void send_move(uint32_t avatarID, uint32_t direction) {
-    printf("Move was sent.\n");
+static bool send_move(uint32_t avatar_id, uint32_t direction, int comm_sock) {
+
+    //form AM_AVATAR_MOVE message to send to server
+    AM_Message my_move;
+    my_move.type = htonl(AM_AVATAR_MOVE);
+    my_move.avatar_move.AvatarID = htonl(avatar_ID);
+    my_move.avatar_move.Direction = htonl(direction);
+
+    //send message to server
+    if (write(comm_sock, &my_move, sizeof(my_move)) < 0)  {
+	return false;
+    }
+    return true;
 }
 
 /*
