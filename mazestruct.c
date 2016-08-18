@@ -26,6 +26,7 @@ typedef struct spot {
 	bool west;
 	bool avatar;
 	bool dead;
+	bool visited;
 	int visited_by[10];
 } spot_t;
 
@@ -62,6 +63,7 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 			}
 			new_spot->avatar = false;
 			new_spot->dead = false;
+			new_spot->visited = false;
 			for(int i = 0; i < 10; i++){
 				new_spot->visited_by[i] = 0;
 			}
@@ -164,10 +166,12 @@ void maze_print(mazestruct_t *maze){
 	printf("\n");
 }
 
-/**************** spot_print() ****************/
-void place_avatar(mazestruct_t *maze, int x, int y){
+/**************** place_avatar() ****************/
+void place_avatar(mazestruct_t *maze, int x, int y, int avatar_number){
 	if(x < maze->width && y < maze->width){
 		maze->map[x][y]->avatar = true;
+		maze->map[x][y]->visited = true;
+		maze->map[x][y]->visited_by[avatar_number] = 1;
 	}
 	else{
 		printf("Avatar location is off the maze.\n");
@@ -254,13 +258,13 @@ void insert_dead_spot(mazestruct_t *maze, int x,int y){
 
 //get_visited
 
-/**************** update_location() ****************/
+/**************** check_wall() ****************/
 bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 
 	//check coords
 	if(x > maze->width || y > maze->height || x < 0 || y < 0){
 		printf("Coordinates are out of range\n");
-		return;
+		return false;
 	}
 	//return east wall status
 	if(direction == 0){
@@ -283,10 +287,14 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 		
 		return maze->map[x][y]->east;
 	}
+	else{
+		return false;
+	}
 
 }
 /**************** is_someone_adjacent() ****************/
 //returns -1 if noone otherwise the direction
+// UPDATE: takes in a direction and returns a bool
 int is_someone_adjacent(mazestruct_t *maze, int x, int y){
 
 	//check coords
@@ -301,31 +309,30 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y){
 		}
 	}
 	//check the north
-	else if(y > 0){
+	if(y > 0){
 		if(maze->map[x][y - 1]->avatar){
 			return 1;
 		}
 	}
 	//check the south
-	else if(y < (maze->height -1)){
+	if(y < (maze->height -1)){
 		if(maze->map[x][y + 1]->avatar){
 			return 2;
 		}
 	}
 	//check the east
-	else if(x < (maze->width - 1)){
+	if(x < (maze->width - 1)){
 		if(maze->map[x + 1][y]->avatar){
 			return 3;
 		}
 	}
-	else{
-		return -1;
-	}
+	//if we make it down to here
+	return -1;
 }
 
 
 /**************** update_location() ****************/
-void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int new_y){
+void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int new_y, int avatar_number){
 
 	//check the initial coords
 	if(init_x > maze->width || init_y > maze->height || init_x < 0 || init_y < 0){
@@ -341,10 +348,56 @@ void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int 
 
 	maze->map[init_x][init_y]->avatar = false;
 	maze->map[new_x][new_y]->avatar = true;
+	maze->map[new_x][new_y]->visited = true;
+	maze->map[new_x][new_y]->visited_by[avatar_number] = 1;
 }
 
+/**************** is_visited() ****************/
+bool is_visited(mazestruct_t *maze, int x, int y, int direction){
 
+	//west spot
+	if(direction == 0 && x > 0){
+		return maze->map[x - 1][y]->visited;
+	}
+	//east spot
+	else if(direction == 3 && (x < (maze->width - 1))){
+		return maze->map[x + 1][y]->visited;
+	}
+	//north spot
+	else if(direction == 1 && (y > 0)){
+		return maze->map[x][y - 1]->visited;
+	}
+	//south spot
+	else if(direction == 2 && (y < maze->height - 1)){
+		return maze->map[x][y + 1]->visited;
+	}
+	else{
+		return false;
+	}
 
+}
+
+/**************** did_x_visit() ****************/
+bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_number){
+	//west spot
+	if(direction == 0 && x > 0){
+		return (maze->map[x - 1][y]->visited_by[avatar_number] == 1);
+	}
+	//east spot
+	else if(direction == 3 && (x < (maze->width - 1))){
+		return (maze->map[x + 1][y]->visited_by[avatar_number] == 1);
+	}
+	//north spot
+	else if(direction == 1 && (y > 0)){
+		return (maze->map[x][y - 1]->visited_by[avatar_number] == 1);
+	}
+	//south spot
+	else if(direction == 2 && (y < maze->height - 1)){
+		return (maze->map[x][y + 1]->visited_by[avatar_number] == 1);
+	}
+	//if we make it down here
+	return false;
+}
 
 
 
