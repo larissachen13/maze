@@ -1,4 +1,4 @@
-/* 
+/*
  * mazestruct.h - header file for mazestruct
  *
  * Benji Hannam, July 2016
@@ -7,11 +7,6 @@
 #ifndef __MAZESTRUCT_H
 #define __MAZESTRUCT_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
- 
 /**************** global types ****************/
 typedef struct maze mazestruct_t;  // opaque to users of the module
 
@@ -19,7 +14,7 @@ typedef struct maze mazestruct_t;  // opaque to users of the module
 /*Creates a new maze
 *
 */
-mazestruct_t maze_new(int height, int width, int num_avatars);
+mazestruct_t *maze_new(int height, int width, int num_avatars);
 void maze_print(mazestruct_t *maze);
 void place_avatar(mazestruct_t *maze, int x, int y, int avatar_number);
 void insert_wall(mazestruct_t *maze, int x, int y, int direction);
