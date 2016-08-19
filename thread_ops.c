@@ -207,7 +207,9 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 	my_avatar->pos.y = ntohl(msg_buff->avatar_turn.Pos[my_avatar->fd].y);
 	//printf("Avatar %d's new position is (%d, %d).\n", my_avatar->fd, 
 		//my_avatar->pos.x, my_avatar->pos.y);
-	place_avatar(maze, my_avatar->pos.x, my_avatar->pos.y, my_avatar->fd); 
+	pthread_mutex_lock(&my_turn);
+	place_avatar(maze, my_avatar->pos.x, my_avatar->pos.y, my_avatar->fd);
+	pthread_mutex_unlock(&my_turn);
 	//printf("It's your turn %d\n", ntohl(msg_buff->avatar_turn.TurnId));
     }
     else {
