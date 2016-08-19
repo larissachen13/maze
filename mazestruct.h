@@ -4,13 +4,13 @@
  * Benji Hannam, July 2016
  */
 
-#ifndef __MAZESTRUCT_H
-#define __MAZESTRUCT_H
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+
+#ifndef __MAZESTRUCT_H
+#define __MAZESTRUCT_H
 
 /**************** global types ****************/
 typedef struct maze mazestruct_t;  // opaque to users of the module
@@ -107,4 +107,15 @@ bool is_visited(mazestruct_t *maze, int x, int y, int direction);
 */
 bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_number);
 
-#endif // __MAZESTRUCT_H
+/**************** delete_maze() ****************/
+/*
+* Deletes the maze preventing memory leaks.
+* 
+* 
+*/
+void delete_maze(mazestruct_t *maze);
+
+#endif
+
+
+

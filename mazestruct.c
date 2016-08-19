@@ -509,6 +509,26 @@ bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 	return false;
 }
 
+/**************** delete_maze() ****************/
+/*
+* Deletes the maze preventing memory leaks.
+* 
+* 
+*/
+void delete_maze(mazestruct_t *maze){
+
+	if(maze != NULL){
+
+		for (int i = 0; i < maze->width; i++){
+			for (int j = 0; j < maze->height; j++){
+				if(maze->map[i][j] != NULL){
+					free(maze->map[i][j]);
+				}
+			}
+		}
+		free(maze);
+	}
+}
 
 
 
