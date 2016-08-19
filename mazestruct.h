@@ -7,6 +7,11 @@
 #ifndef __MAZESTRUCT_H
 #define __MAZESTRUCT_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+ 
 /**************** global types ****************/
 typedef struct maze mazestruct_t;  // opaque to users of the module
 
