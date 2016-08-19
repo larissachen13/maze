@@ -229,7 +229,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 	if(direction == 0){
 		//set the west wall and the east wall of the spot to the left
 		maze->map[x][y]->west = true;
-		if(y > 0){
+		if(x > 0){
 			maze->map[x -1][y]->east = true;
 		}
 		if(!maze->map[x][y]->dead){
