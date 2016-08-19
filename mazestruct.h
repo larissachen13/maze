@@ -13,7 +13,7 @@
 #define __MAZESTRUCT_H
 
 /**************** global types ****************/
-typedef struct maze mazestruct_t;  // opaque to users of the module
+typedef struct mazestruct mazestruct_t;  // opaque to users of the module
 
 /**************** functions ****************/
 
@@ -81,7 +81,7 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction);
 * Takes in the maze struct, x,y coordinates and the direction as parameters.
 * returns true if someone is adjacent and false otherwise.
 */
-int is_someone_adjacent(mazestruct_t *maze, int x, int y);
+bool is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction);
 
 /**************** update_location() ****************/
 /*
@@ -116,6 +116,5 @@ bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_num
 void delete_maze(mazestruct_t *maze);
 
 #endif
-
 
 
