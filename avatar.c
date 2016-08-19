@@ -22,12 +22,22 @@
 #include <unistd.h>
 #include "avatar.h"
 
+/***************************** local struct ********************************/
+typedef struct avatar_move {
+    int direction;
+    int score;
+} avatar_move;
+
 /*********************** local function prototypes ************************/
-static int get_best_move(mazestruct_t *maze, Avatar *avatar);
-static int get_best_move_helper(mazestruct_t *maze, Avatar *avatar);
+static void get_best_move(mazestruct_t *maze, Avatar *avatar, 
+	avatar_move *best_move);
+static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
+	avatar_move *best_move);
+static void update_maze(mazestruct_t *maze, XYPos old_pos, 
+	avatar_move *move, Avatar *avatar);
 static bool send_move(uint32_t avatar_id, uint32_t direction, int comm_sock);
 static bool same_pos(XYPos old_pos, XYPos new_pos);
-static int come_together();
+static void come_together(avatar_move *move);
 
 /**************************** global functions *****************************/
 /*
@@ -37,21 +47,31 @@ static int come_together();
 void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock, 
 	AM_Message *msg_buff) {
 
-    //save current position can check later if move was successful
-    XYPos old_pos = avatar->pos;
-
-    int move = get_best_move(maze, avatar);
-    if (!send_move(avatar->fd, move, comm_sock)) {
-	fprintf(stderr, "Error writing avatar %d's move to server.\n", 
+    avatar_move *move;
+    
+    if ((move = malloc(sizeof(avatar_move))) == NULL) {
+	fprintf(stderr, "Avatar %d could not make move due to malloc error.\n",
 		avatar->fd);
     }
-
-    wait_for_response(comm_sock, msg_buff);
-    if (ntohl(msg_buff->type) == AM_AVATAR_TURN) {
-	//update avatar position based on response
-	avatar->pos.x = ntohl(msg_buff->avatar_turn.Pos[avatar->fd].x);
-	avatar->pos.y = ntohl(msg_buff->avatar_turn.Pos[avatar->fd].y);
-	update_maze(maze, old_pos, move, avatar);
+    else {
+	//save current position can check later if move was successful
+	XYPos old_pos = avatar->pos;
+	
+	get_best_move(maze, avatar, move);
+	if (!send_move(avatar->fd, move->direction, comm_sock)) {
+	    fprintf(stderr, "Error writing avatar %d's move to server.\n", 
+		avatar->fd);
+	}
+	
+	wait_for_response(comm_sock, msg_buff);
+	
+	if (ntohl(msg_buff->type) == AM_AVATAR_TURN) {
+	    //update avatar position based on response
+	    avatar->pos.x = ntohl(msg_buff->avatar_turn.Pos[avatar->fd].x);
+	    avatar->pos.y = ntohl(msg_buff->avatar_turn.Pos[avatar->fd].y);
+	    update_maze(maze, old_pos, move, avatar);
+	}
+	free(move);
     }
 }
 
@@ -72,10 +92,11 @@ void wait_for_response(int comm_sock, AM_Message *msg_buff) {
  * Updates the shared map of the maze based on an avatar's last move, former
  * 	position, and current positon
  */
-void update_maze(mazestruct_t *maze, XYPos old_pos, int move, Avatar *avatar) {
+static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move, 
+	Avatar *avatar) {
     //if move failed add a wall to the maze at that spot
-    if ((move != M_NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
-	insert_wall(maze, avatar->pos.x, avatar->pos.y, move);
+    if ((move->direction != M_NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
+	insert_wall(maze, avatar->pos.x, avatar->pos.y, move->direction);
     }
     //otherwise...
     else {
@@ -83,7 +104,7 @@ void update_maze(mazestruct_t *maze, XYPos old_pos, int move, Avatar *avatar) {
 	update_location(maze, old_pos.x, old_pos.y, avatar->pos.x,
 		avatar->pos.y, avatar->fd);
 	//if avatar was forced to backtrack it has reached a dead end
-	if (move == HAVE_TO_BACK_TRACK) {
+	if (move->score == HAVE_TO_BACK_TRACK) {
 	    insert_dead_spot(maze, old_pos.x, old_pos.y);
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
@@ -98,18 +119,16 @@ void update_maze(mazestruct_t *maze, XYPos old_pos, int move, Avatar *avatar) {
  * Determines an avatar's next move using the shared maze knowledge of all the
  * 	avatars and the avatar's current position
  */
-static int get_best_move(mazestruct_t *maze, Avatar *avatar) {
-
-    int best_move;
+static void get_best_move(mazestruct_t *maze, Avatar *avatar, 
+	avatar_move *best_move) {
 
     //haven't figured out what to do here so just avoid situation
     if (false) {
-	best_move = come_together();
+	come_together(best_move);
     }
     else {
-	best_move = get_best_move_helper(maze, avatar);
+	get_best_move_helper(maze, avatar, best_move);
     }
-    return best_move;
 }
 
 /*
@@ -124,15 +143,16 @@ static int get_best_move(mazestruct_t *maze, Avatar *avatar) {
  *
  * See avatar.h for details on priorities
  */
-static int get_best_move_helper(mazestruct_t *maze, Avatar *avatar) {
+static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar, 
+	avatar_move *best_move) {
 
-    int best_move = -1; //stores score of best move so far
+    best_move->score = -1; //stores score of best move so far
     int move_rank; //keeps score for the current move
 
-    for (int move = M_WEST; move < M_NUM_DIRECTIONS; move++) {
+    for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	/************* score the move *****************/
 	//if the move results in running into a wall
-	if (check_wall(maze, avatar->pos.x, avatar->pos.y, move)) {
+	if (check_wall(maze, avatar->pos.x, avatar->pos.y, direction)) {
 	    move_rank = DONT_DO_IT;
 	}
 	//if the move results in potentially meeting another avatar
@@ -141,13 +161,13 @@ static int get_best_move_helper(mazestruct_t *maze, Avatar *avatar) {
 	    move_rank = FIRST_PRIORITY;
 	}
 	//if the move results in potentially visiting an unvisited space
-	else if(!is_visited(maze, avatar->pos.x, avatar->pos.y, move)) {
-	    printf("Direction %d is unvisited.\n", move);
+	else if(!is_visited(maze, avatar->pos.x, avatar->pos.y, direction)) {
+	    printf("Direction %d is unvisited.\n", direction);
 	    move_rank = SECOND_PRIORITY;
 	}
 	//if the move results in potentially visiting a space visited by
 	//a different avatar
-	else if(!did_x_visit(maze, avatar->pos.x, avatar->pos.y, move, 
+	else if(!did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction, 
 		    avatar->fd)) {
 	    move_rank = THIRD_PRIORITY;
 	}
@@ -156,11 +176,11 @@ static int get_best_move_helper(mazestruct_t *maze, Avatar *avatar) {
 	    move_rank = HAVE_TO_BACK_TRACK;
 	}
 	//check how current move compares to the best_move
-	if (move_rank > best_move) {
-	    best_move = move;
+	if (move_rank > best_move->score) {
+	    best_move->direction = direction;
+	    best_move->score = move_rank;
 	}
     }
-    return best_move;
 }
 
 /*
@@ -193,8 +213,6 @@ static bool same_pos(XYPos old_pos, XYPos new_pos) {
  * Test method that will eventually be replaced with actual method to bring
  * 	avatars together
  */
-static int come_together() {
-    int move = 10;
+static void come_together(avatar_move *move) {
     printf("Coming together!!!\n");
-    return move;
 }
