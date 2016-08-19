@@ -158,7 +158,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	}
 	//if the move results in potentially meeting another avatar
 	//needs editing!!!!
-	else if (is_someone_adjacent(maze, avatar->pos.x, avatar->pos.y, move)) {
+	else if (is_someone_adjacent(maze, avatar->pos.x, avatar->pos.y, direction)) {
 	    move_rank = FIRST_PRIORITY;
 	}
 	//if the move results in potentially visiting an unvisited space
