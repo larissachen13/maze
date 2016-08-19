@@ -41,6 +41,11 @@ typedef struct mazestruct{
 /********************** global functions *********************/
 
 /**************** maze_new() ****************/
+/*
+* Takes in the height and width of the maze and the number of avatars playing the game.
+* Allocates memory for the maze structure and generates the 2d array of the grid spots.
+* returns a pointer the the new maze structure generated.
+*/
 mazestruct_t* maze_new(int height, int width, int num_avatars){
 
 	mazestruct_t *new_maze = malloc(sizeof(mazestruct_t));
@@ -103,6 +108,12 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 }
 
 /**************** maze_print() ****************/
+/*
+* Prints out the 2D representation of the maze. 
+* Prints from left to right and top to bottom going row by row.
+* If there are two avatars on the same spot it will print the lowest numbers avatar.
+* 
+*/
 void maze_print(mazestruct_t *maze){
 
 	printf("   ");
@@ -137,7 +148,7 @@ void maze_print(mazestruct_t *maze){
 			if(maze->map[j][i]->avatar){
 				for(int n = 0; n < 10; n++){
 					if(maze->map[j][i]->avatar_number[n] == 1){
-						printf(" %d ", i);
+						printf(" %d ", n);
 						break;
 					}
 				}
@@ -173,17 +184,22 @@ void maze_print(mazestruct_t *maze){
 }
 
 /**************** place_avatar() ****************/
-void place_avatar(mazestruct_t *maze, int x, int y, int avatar_number){
+/*
+* Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar.
+* Then marks the avatar at being in that spot referenced by the x,y coordinates provided.
+* Also prints the entire maze structure to stdout.
+*/
+void place_avatar(mazestruct_t *maze, int x, int y, int avatar_id){
 	//if we are within bounds
 	if(x < maze->width && y < maze->width && x > -1 && y > -1){
 		//mark the spot appropriately
 		maze->map[x][y]->avatar = true;
 		maze->map[x][y]->visited = true;
-		maze->map[x][y]->visited_by[avatar_number] = 1;
-		maze->map[x][y]->avatar_number[avatar_number] = 1;
+		maze->map[x][y]->visited_by[avatar_id] = 1;
+		maze->map[x][y]->avatar_number[avatar_id] = 1;
 		//print the update
 		printf("\n********************************************************************************\n");
-		printf("Inserted avatar %d at %d,%d.\n", avatar_number, x, y);
+		printf("Inserted avatar %d at %d,%d.\n", avatar_id, x, y);
 		maze_print(maze);
 		printf("********************************************************************************\n");
 	}
@@ -192,9 +208,12 @@ void place_avatar(mazestruct_t *maze, int x, int y, int avatar_number){
 	}
 }
 
-//1 is north, 3 is east, 0 is west, 2 is south
-
 /**************** insert_wall() ****************/
+/*
+* Tells the maze structure where a wall has been found.
+* Takes in a pointer to a maze struct, a pair of x,y coordinates and a direction denoted by:
+* 0 = west, 1 = north, 2 = south and 3 = west.
+*/
 void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 
 	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
@@ -257,6 +276,11 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 }
 
 /**************** visited_spot() ****************/
+/*
+* Marks a spot as being visited by an avatar.
+* Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar that visited it.
+* 
+*/
 void visited_spot(mazestruct_t *maze, int x, int y, int avatar_number){
 
 	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
@@ -269,10 +293,14 @@ void visited_spot(mazestruct_t *maze, int x, int y, int avatar_number){
 	else{
 		printf("avatar number is not valid \n");
 	}
-
 }
 
 /**************** insert_dead_spot() ****************/
+/*
+* Marks a spot as being dead.
+* Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar that visited it.
+* 
+*/
 void insert_dead_spot(mazestruct_t *maze, int x,int y){
 
 	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
@@ -282,6 +310,7 @@ void insert_dead_spot(mazestruct_t *maze, int x,int y){
 	else{
 		//mark as dead
 		maze->map[x][y]->dead = true;
+		maze->map[x][y]->visited = false;
 		//add west wall
 		insert_wall(maze, x, y, 0);
 		//add north wall
@@ -300,6 +329,12 @@ void insert_dead_spot(mazestruct_t *maze, int x,int y){
 }
 
 /**************** check_wall() ****************/
+/*
+* Checks if we know for sure there is a wall on the side of a spot
+* Takes in a pointer to a maze struct, a pair of x,y coords and a direction designated by:
+* 0 = west, 1 = north, 2 = south and 3 = west.
+* Returns true if there is a wall and false if there is not.
+*/
 bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 
 	//check coords
@@ -334,9 +369,12 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 
 }
 /**************** is_someone_adjacent() ****************/
-//returns -1 if noone otherwise the direction
-// UPDATE: takes in a direction and returns a bool
-int is_someone_adjacent(mazestruct_t *maze, int x, int y){
+/*
+* Checks if there is someone the adjacent spot dictated by the inputted direction.
+* Takes in the maze struct, x,y coordinates and the direction as parameters.
+* returns true if someone is adjacent and false otherwise.
+*/
+bool is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 
 	//check coords
 	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
@@ -344,36 +382,35 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y){
 		return -1;
 	}
 	//check the west
-	if(x > 0){
-		if(maze->map[x - 1][y]->avatar){
-			return 0;
-		}
+	if((x > 0) && (direction == 0)){
+		return maze->map[x - 1][y]->avatar;
 	}
 	//check the north
-	if(y > 0){
-		if(maze->map[x][y - 1]->avatar){
-			return 1;
-		}
+	if((y > 0) && (direction == 1)){
+		return (maze->map[x][y - 1]->avatar);
 	}
 	//check the south
-	if(y < (maze->height -1)){
-		if(maze->map[x][y + 1]->avatar){
-			return 2;
-		}
+	if((y < (maze->height -1)) && (direction == 2)){
+		return maze->map[x][y + 1]->avatar;
 	}
 	//check the east
-	if(x < (maze->width - 1)){
+	if((x < (maze->width - 1)) && (direction == 3)){
 		if(maze->map[x + 1][y]->avatar){
 			return 3;
 		}
 	}
 	//if we make it down to here
-	return -1;
+	return false;
 }
 
 
 /**************** update_location() ****************/
-void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int new_y, int avatar_number){
+/*
+* Moves an avatar from one spot to another one.
+* Takes in a maze struct, the inital x,y and the new x,y coordinates and the id of the avatar to move.
+*
+*/
+void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int new_y, int avatar_id){
 
 	//check the initial coords
 	if(init_x > (maze->width - 1) || init_y > (maze->height - 1) || init_x < 0 || init_y < 0){
@@ -388,7 +425,7 @@ void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int 
 	}
 
 	//update the initial spot
-	maze->map[init_x][init_y]->avatar_number[avatar_number] = 0;
+	maze->map[init_x][init_y]->avatar_number[avatar_id] = 0;
 	//assume there are no more avatars at that spot
 	maze->map[init_x][init_y]->avatar = false;
 	//check if there are more and set the bool to true if so
@@ -402,16 +439,20 @@ void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int 
 	//update the new spot
 	maze->map[new_x][new_y]->avatar = true;
 	maze->map[new_x][new_y]->visited = true;
-	maze->map[new_x][new_y]->visited_by[avatar_number] = 1;
-	maze->map[new_x][new_y]->avatar_number[avatar_number] = 1;
+	maze->map[new_x][new_y]->visited_by[avatar_id] = 1;
+	maze->map[new_x][new_y]->avatar_number[avatar_id] = 1;
 
 	printf("\n********************************************************************************\n");
-	printf("Moved avatar %d from %d,%d to %d,%d.\n", avatar_number, init_x, init_y, new_x, new_y);
+	printf("Moved avatar %d from %d,%d to %d,%d.\n", avatar_id, init_x, init_y, new_x, new_y);
 	maze_print(maze);
 	printf("********************************************************************************\n");
 }
 
 /**************** is_visited() ****************/
+/*
+* Checks if a nearby spot denoted by the direction has been visited.
+* returns true if it has, false if it hasn't
+*/
 bool is_visited(mazestruct_t *maze, int x, int y, int direction){
 
 	//west spot
@@ -437,26 +478,33 @@ bool is_visited(mazestruct_t *maze, int x, int y, int direction){
 }
 
 /**************** did_x_visit() ****************/
-bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_number){
+/*
+* Checks if a spot denoted by a direction has been 
+* Takes in the maze struct, x,y coordinates, the direction and an avatar id as parameters.
+* returns true if the avatar has visited it otherwise returns false.
+*/
+bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id){
 	//west spot
 	if(direction == 0 && x > 0){
-		return (maze->map[x - 1][y]->visited_by[avatar_number] == 1);
+		return (maze->map[x - 1][y]->visited_by[avatar_id] == 1);
 	}
 	//east spot
 	else if(direction == 3 && (x < (maze->width - 1))){
-		return (maze->map[x + 1][y]->visited_by[avatar_number] == 1);
+		return (maze->map[x + 1][y]->visited_by[avatar_id] == 1);
 	}
 	//north spot
 	else if(direction == 1 && (y > 0)){
-		return (maze->map[x][y - 1]->visited_by[avatar_number] == 1);
+		return (maze->map[x][y - 1]->visited_by[avatar_id] == 1);
 	}
 	//south spot
 	else if(direction == 2 && (y < maze->height - 1)){
-		return (maze->map[x][y + 1]->visited_by[avatar_number] == 1);
+		return (maze->map[x][y + 1]->visited_by[avatar_id] == 1);
 	}
 	//if we make it down here
 	return false;
 }
+
+
 
 
 
