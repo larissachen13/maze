@@ -4,7 +4,7 @@
 # Team core_dumped_in_a_maze
 
 PROG = AMStartup
-OBJS = AMStartup.o thread_ops.o mazestruct.o
+OBJS = AMStartup.o thread_ops.o mazestruct.o avatar.o
 # LLIBS = ../lib/lib.a
 
 CFLAGS = -Wall -pedantic -std=c11 -ggdb -lpthread
@@ -19,6 +19,7 @@ $(PROG): $(OBJS) $(LLIBS)
 AMStartup.o: amazing.h thread_ops.h
 thread_ops.o: thread_ops.h
 mazestruct.o: mazestruct.h
+avatar.o: avatar.h
 
 # build the library
 ../lib/lib.a:
@@ -30,4 +31,3 @@ clean:
 	rm -f *~
 	rm -f *.o
 	rm -f $(PROG)
-	cd ../lib; $(MAKE) clean

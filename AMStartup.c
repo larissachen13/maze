@@ -19,9 +19,13 @@
 #include "amazing.h"
 #include "thread_ops.h"
 
+/******************** function prototypes ******************/
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server);
 int recv_init_response(int comm_sock, AM_Message *init_response);
 
+/******************** global variables **********************/
+mazestruct_t *maze;
+pthread_mutex_t my_turn;
 
 /*
  *  Main
@@ -124,33 +128,44 @@ int main (int argc, char* argv[]) {
   logfile = fopen(filename, "w");
   fclose(logfile);
 
-  // 6. Start the avatar threads
-  // error = generate_avatars(n, maze_port, hostname);
-
+  //stuff needed to create and run threads
   void *thread_status;
   pthread_t avatars[AM_MAX_AVATAR];
   thread_data_t *params;
+  if (pthread_mutex_init(&my_turn, NULL) != 0) {
+      perror("Mutex creation failed.\n");
+      close(comm_sock);
+      exit(5);
+  }
+  else if ((maze = maze_new(maze_height, maze_width, n)) == NULL) {
+      perror("Maze could not be created.\n");
+      close(comm_sock);
+      exit(6);
+  }
+  else {
+  // error = generate_avatars(n, maze_port, hostname);
+  // 6. Start the avatar threads
+    for (int i = 0; i < n; i++) {
 
     // generate params to pass into each thread
-
-
-    for (int i = 0; i < n; i++) {
       params = malloc(sizeof(thread_data_t));
       params->maze_port = maze_port;
       params->host_name = hostname;
       params->id = i;
-      pthread_create(&avatars[i], NULL, avatar_thread, params);
-      if (avatars[i] != 0) {
-        //  return AVATAR_NOT_CREATED;
-      }
-      //free the params
-    }
-    for (int i = 0; i < n; i++) {
-       pthread_join(avatars[i], &thread_status);
-    }
-    return 1;
 
+      if (pthread_create(&avatars[i], NULL, avatar_thread, params) != 0) {
+	  fprintf(stderr, "Thread for avatar %d could not be created.\n", i);
+        //return AVATAR_NOT_CREATED;
+      }
+    }
+      for (int i = 0; i < n; i++) {
+	  pthread_join(avatars[i], &thread_status);
+      }
+  }
+  //delete maze
+  //free the params
   close(comm_sock);
+  exit(0);
 }
 
 /************ Defined Functions ***************/

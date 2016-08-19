@@ -1,9 +1,9 @@
 /*
- * avatartest.c
- * Name: Benjamin Littlejohn
+ * thread_ops.c
+ * Authors: Benjamin Littlejohn and Larissa Chen
  * Team: core_dumped_in_a_maze
  * Date: August 2016
- * Purpose: Test for avatar.c module of cs50 X16 project Maze Challenge
+ * Purpose: Runs the avatar threads for cs50 X16 project Maze Challenge
  */
 
 /***************** Return Statuses ******************/
@@ -21,38 +21,31 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <unistd.h>
-#include <pthread.h>
 #include <string.h>
-#include "amazing.h"
-#include "mazestruct.h"
-#include "avatar.h"
+#include <pthread.h>
+#include <unistd.h>
+#include "thread_ops.h"
 
+/************ local function prototypes ************/
+//int generate_avatars(int num_avatars, int maze_port, char *host_name);
 
-/******************* local structs *****************/
-typedef struct thread_data {
-    int id;
-    int maze_port;
-    char *host_name;
-} thread_data_t;
-
-/************ function prototypes ************/
-int generate_avatars(int num_avatars, int maze_port, char *host_name);
-void *avatar_thread(void *params);
-int avatar(int avatar_id, mazestruct_t *maze, int maze_port, char *hostname);
+static int run_avatar_thread(int avatar_id, mazestruct_t *maze, int maze_port, 
+	char *hostname);
 static Avatar *initialize_avatar(int id);
 static int connect_to_server(int *comm_sock, char *hostname, int maze_port);
 static int send_am_avatar_ready(Avatar *my_avatar, AM_Message *msg_buff,
 	int comm_sock);
 void wait_for_response(int comm_sock, AM_Message *msg_buff);
-// static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
-// 	AM_Message *msg_buff);
+static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
+ 	AM_Message *msg_buff);
 
-/***************** global variables ****************/
-//thread_mutex_t my_turn;
-mazestruct_t *maze;
+/******************** external global declarations ****************/
+//not sure if this is a good idea but doing it anyway
+extern mazestruct_t *maze;
+extern pthread_mutex_t my_turn;
 
 /**************** generate_avatars ****************/
+/*
 int generate_avatars(int num_avatars, int maze_port, char *host_name) {
   void *thread_status;
   pthread_t avatars[AM_MAX_AVATAR];
@@ -74,19 +67,20 @@ int generate_avatars(int num_avatars, int maze_port, char *host_name) {
     }
     return SUCCESS;
 }
+*/
 
 /**************** avatar_thread ****************/
 void *avatar_thread(void *params) {
   thread_data_t *thread_data = (thread_data_t *)params;
 
-  int ret_status = avatar(thread_data->id, maze,
+  int ret_status = run_avatar_thread(thread_data->id, maze,
 	  thread_data->maze_port, thread_data->host_name);
 
   return((void *)ret_status);
 }
 
-/**************** avatar ****************/
-int avatar(int avatar_id, mazestruct_t *maze, int maze_port,
+/**************** run_avatar_thread ****************/
+static int run_avatar_thread(int avatar_id, mazestruct_t *maze, int maze_port,
 	char *hostname) {
 
     //declarations
@@ -98,7 +92,7 @@ int avatar(int avatar_id, mazestruct_t *maze, int maze_port,
     Avatar *my_avatar = initialize_avatar(avatar_id);
 
     if (msg_buff == NULL || my_avatar == NULL) {
-	     perror("Malloc error. Avatartest couldn't be run.\n");
+	     perror("Malloc error. Thread couldn't be created.\n");
 	      ret_status = MALLOC_ERROR;
     }
     else if ((ret_status = connect_to_server(&comm_sock, hostname, maze_port)
@@ -108,27 +102,21 @@ int avatar(int avatar_id, mazestruct_t *maze, int maze_port,
 	     close(comm_sock); //then jump to clean up and exit
     }
     else {
-      wait_for_response(comm_sock, msg_buff);
-      if(ntohl(msg_buff->type) == AM_AVATAR_TURN) {
-        printf("It's your turn %d\n", (ntohl((msg_buff->avatar_turn).TurnId)));
-      } else {
-        printf("Message type is: %d\n", ntohl(msg_buff->type));
-      }
-      //	ret_status = solve_maze(my_avatar, maze, comm_sock);
-	     close(comm_sock);
+      ret_status = solve_maze(my_avatar, maze, comm_sock, msg_buff);
     }
 
     // clean up
     close(comm_sock);
     free(my_avatar);
     free(msg_buff);
-    free(maze);
 
     return ret_status;
 }
 
 /*
  * Creates a new avatar struct with the given id
+ * Returns NULL upon failure or a pointer to the Avatar when successful
+ * Caller is responsible for freeing the avatar
  */
 static Avatar *initialize_avatar(int id) {
     Avatar *avatar = malloc(sizeof(Avatar));
@@ -207,22 +195,33 @@ static int send_am_avatar_ready(Avatar *my_avatar, AM_Message *msg_buff,
 /*
  * Method run by threads once everything is set up to solve the maze
  */
-/*
 static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 	AM_Message *msg_buff) {
+    
     int ret_status;
 
     wait_for_response(comm_sock, msg_buff);
+    if(ntohl(msg_buff->type) == AM_AVATAR_TURN) {
+	//update avatar position based on response
+	my_avatar->pos.x = ntohl(msg_buff->avatar_turn.Pos[my_avatar->fd].x);
+	my_avatar->pos.y = ntohl(msg_buff->avatar_turn.Pos[my_avatar->fd].y);
+	//printf("Avatar %d's new position is (%d, %d).\n", my_avatar->fd, 
+		//my_avatar->pos.x, my_avatar->pos.y);
+	place_avatar(maze, my_avatar->pos.x, my_avatar->pos.y, my_avatar->fd); 
+	//printf("It's your turn %d\n", ntohl(msg_buff->avatar_turn.TurnId));
+    }
+    else {
+        printf("Message type is: %d\n", ntohl(msg_buff->type));
+    }
 
     //try to solve the maze
-    while (msg_buff->type == AM_AVATAR_TURN) {
-	//update avatar position based on response
-	my_avatar->pos = ntohl((msg_buff->avatar_turn).Pos[my_avatar->fd]);
+    while (ntohl(msg_buff->type) == AM_AVATAR_TURN) {
 	//if it is your turn...
-	if (ntohl((msg_buff->avatar_turn).TurnId) == my_avatar->fd) {
-	    //pthread_mutex_lock(&my_turn); //make sure no one else can go
+	if (ntohl(msg_buff->avatar_turn.TurnId) == my_avatar->fd) {
+	    //printf("Avatar %d is taking its turn.\n", my_avatar->fd);
+	    pthread_mutex_lock(&my_turn); //make sure no one else can go
 	    make_move(maze, my_avatar, comm_sock, msg_buff);
-	    //pthread_mutex_unlock(&my_turn); //allow next person to go
+	    pthread_mutex_unlock(&my_turn); //allow next person to go
 	}
 	else {
 	    wait_for_response(comm_sock, msg_buff);
@@ -230,13 +229,13 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     }
 
     // once loop is ended, either maze has been solved or an error occured
-    switch (msg_buff->type) {
+    switch (ntohl(msg_buff->type)) {
 	case (AM_MAZE_SOLVED):
 	    printf("The maze was solved!!!!\n");
 	    ret_status = SUCCESS;
 	    break;
 	default:
-	    if (IS_AM_ERROR(msg_buff->type)) {
+	    if (IS_AM_ERROR(ntohl(msg_buff->type))) {
 		fprintf(stderr, "Error %d.\n", msg_buff->type);
 		ret_status = FAILED;
 	    }
@@ -247,11 +246,4 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     }
     return ret_status;
 }
-*/
 
-
-void wait_for_response(int comm_sock, AM_Message *msg_buff) {
-    if ((read(comm_sock, msg_buff, sizeof(AM_Message))) < 0) {
-	     perror("Error reading message from server.\n");
-    }
-}

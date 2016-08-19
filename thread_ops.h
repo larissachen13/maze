@@ -8,9 +8,11 @@
 #include "amazing.h"
 #include "mazestruct.h"
 #include "avatar.h"
+
 #ifndef __THREAD_OPS_H
 #define __THREAD_OPS_H
 
+/**************** global structs ******************/
 typedef struct thread_data {
     int id;
     int maze_port;
@@ -24,7 +26,7 @@ typedef struct thread_data {
  * Returns AVATAR_NOT_CREATED if there was an error creating an avatar's thread
  * Returns SUCCESS if each avatar's thread is successfully created.
  */
-int generate_avatars(int num_avatars, int maze_port, char *host_name);
+//int generate_avatars(int num_avatars, int maze_port, char *host_name);
 
 /**************** avatar_thread ****************/
 /*

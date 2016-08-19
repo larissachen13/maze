@@ -18,28 +18,41 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <netdb.h>
+#include <unistd.h>
 #include "avatar.h"
+
+/*********************** local function prototypes ************************/
+static int get_best_move(mazestruct_t *maze, Avatar *avatar);
+static int get_best_move_helper(mazestruct_t *maze, Avatar *avatar);
+static bool send_move(uint32_t avatar_id, uint32_t direction, int comm_sock);
+static bool same_pos(XYPos old_pos, XYPos new_pos);
+static int come_together();
 
 /**************************** global functions *****************************/
 /*
  * Method to move a given avatar
  * See avatar.h for full description
  */
-void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock) {
+void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock, 
+	AM_Message *msg_buff) {
 
     //save current position can check later if move was successful
     XYPos old_pos = avatar->pos;
 
-    int move = get_best_move(maze, avatar->pos);
+    int move = get_best_move(maze, avatar);
     if (!send_move(avatar->fd, move, comm_sock)) {
-	perror("Error writing avatar %d's move to server.\n", avatar->id);
+	fprintf(stderr, "Error writing avatar %d's move to server.\n", 
+		avatar->fd);
     }
 
     wait_for_response(comm_sock, msg_buff);
-
-    //update avatar position based on response
-    my_avatar->pos = ntohl(msg_buff->Pos[my_avatar->fd]);
-    update_maze(maze, old_pos, move, my_avatar);
+    if (ntohl(msg_buff->type) == AM_AVATAR_TURN) {
+	//update avatar position based on response
+	avatar->pos.x = ntohl(msg_buff->avatar_turn.Pos[avatar->fd].x);
+	avatar->pos.y = ntohl(msg_buff->avatar_turn.Pos[avatar->fd].y);
+	update_maze(maze, old_pos, move, avatar);
+    }
 }
 
 /*
@@ -50,7 +63,7 @@ void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock) {
  * 	freeing it
  */
 void wait_for_response(int comm_sock, AM_Message *msg_buff) {
-    if ((read(comm_sock, *msg_buff, sizeof(AM_Message))) < 0) {
+    if ((read(comm_sock, msg_buff, sizeof(AM_Message))) < 0) {
 	     perror("Error reading message from server.\n");
     }
 }
@@ -61,7 +74,7 @@ void wait_for_response(int comm_sock, AM_Message *msg_buff) {
  */
 void update_maze(mazestruct_t *maze, XYPos old_pos, int move, Avatar *avatar) {
     //if move failed add a wall to the maze at that spot
-    if ((move != NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
+    if ((move != M_NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
 	insert_wall(maze, avatar->pos.x, avatar->pos.y, move);
     }
     //otherwise...
@@ -85,7 +98,7 @@ void update_maze(mazestruct_t *maze, XYPos old_pos, int move, Avatar *avatar) {
  * Determines an avatar's next move using the shared maze knowledge of all the
  * 	avatars and the avatar's current position
  */
-static int get_best_move(mazestruct_t *maze, XYPos my_pos) {
+static int get_best_move(mazestruct_t *maze, Avatar *avatar) {
 
     int best_move;
 
@@ -94,7 +107,7 @@ static int get_best_move(mazestruct_t *maze, XYPos my_pos) {
 	best_move = come_together();
     }
     else {
-	best_move = get_best_move_helper(maze, my_pos);
+	best_move = get_best_move_helper(maze, avatar);
     }
     return best_move;
 }
@@ -111,28 +124,30 @@ static int get_best_move(mazestruct_t *maze, XYPos my_pos) {
  *
  * See avatar.h for details on priorities
  */
-static int get_best_move_helper(mazestruct_t *maze, XYPos my_pos) {
+static int get_best_move_helper(mazestruct_t *maze, Avatar *avatar) {
 
     int best_move = -1; //stores score of best move so far
     int move_rank; //keeps score for the current move
 
-    for (int move = M_WEST; i < M_NUM_DIRECTIONS; move++) {
+    for (int move = M_WEST; move < M_NUM_DIRECTIONS; move++) {
 	/************* score the move *****************/
 	//if the move results in running into a wall
-	if (check_wall(maze, my_pos.x, my_pos.y, move)) {
+	if (check_wall(maze, avatar->pos.x, avatar->pos.y, move)) {
 	    move_rank = DONT_DO_IT;
 	}
 	//if the move results in potentially meeting another avatar
-	else if (is_someone_adjacent(maze, my_pos.x, my_pos.y, move)) {
+	//needs editing!!!!
+	else if (is_someone_adjacent(maze, avatar->pos.x, avatar->pos.y)) { //, move)) {
 	    move_rank = FIRST_PRIORITY;
 	}
 	//if the move results in potentially visiting an unvisited space
-	else if(!is_visited(maze, my_pos.x, my_pos.y, move)) {
+	else if(!is_visited(maze, avatar->pos.x, avatar->pos.y, move)) {
 	    move_rank = SECOND_PRIORITY;
 	}
 	//if the move results in potentially visiting a space visited by
 	//a different avatar
-	else if(!did_x_visit(maze, my_pos.x, my_pos.y, move, avatar->fd)) {
+	else if(!did_x_visit(maze, avatar->pos.x, avatar->pos.y, move, 
+		    avatar->fd)) {
 	    move_rank = THIRD_PRIORITY;
 	}
 	//if the move results in visiting a space I have already visited
@@ -156,7 +171,7 @@ static bool send_move(uint32_t avatar_id, uint32_t direction, int comm_sock) {
     //form AM_AVATAR_MOVE message to send to server
     AM_Message my_move;
     my_move.type = htonl(AM_AVATAR_MOVE);
-    my_move.avatar_move.AvatarID = htonl(avatar_ID);
+    my_move.avatar_move.AvatarId = htonl(avatar_id);
     my_move.avatar_move.Direction = htonl(direction);
 
     //send message to server
