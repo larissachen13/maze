@@ -1,7 +1,7 @@
 /*
  * avatartest.c
  * Name: Benjamin Littlejohn
- * Team: core_dumped_in_a_maze 
+ * Team: core_dumped_in_a_maze
  * Date: August 2016
  * Purpose: Test for avatar.c module of cs50 X16 project Maze Challenge
  */
@@ -28,7 +28,7 @@
 
 /******************* local structs *****************/
 typedef struct thread_data {
-    int num_avatars;
+    int avatar_id;
     int maze_port;
     char *host_name;
 } thread_data_t
@@ -42,29 +42,30 @@ int main(int argc, char *argv[]) {
     return SUCCESS;
 }
 
+/**************** generate_avatars ****************/
 int generate_avatars(int num_avatars, int maze_port, char *host_name) {
+  void *thread_status;
+  pthread_t avatars[AM_MAX_AVATAR];
 
-    //initialize needed data structures
-    pthread_t avatars[AM_MAX_AVATAR];
+  // create each avatar's thread with avatar_thread function and its own params
+  for (int i = 0; i < num_avatars, i++) {
+    // generate params to pass into each thread
     thread_data_t params;
-    params.num_avatars = num_avatars;
+    params.avatar_id = i;
     params.maze_port = maze_port;
     params.host_name = host_name;
-
-    int i;
-
-    for (i = 0; i < num_avatars, i++) {
-	pthread_create(&avatars[i], NULL, avatar_thread, params);
-	if (avatars[i] != 0) {
-	    return AVATAR_NOT_CREATED;
-	}
+    if(pthread_create(&avatars[i], NULL, avatar_thread, params) < 0) {
+      return AVATAR_NOT_CREATED;
     }
-    for (i = 0; i < num_avatars, i++) {
-	pthread_join(&avatars[i], NULL);
-    }
-    return SUCCESS;
+  }
+
+  for (i = 0; i < num_avatars, i++) {
+     pthread_join(&avatars[i], &thread_status);
+  }
+  return SUCCESS;
 }
 
+/**************** avatar_thread ****************/
 void *avatar_thread(void *params) {
 
     thread_data_t *thread_data = (thread_data_t *)params;
@@ -72,10 +73,12 @@ void *avatar_thread(void *params) {
     int ret_status = avatar(thread_data->avatar_id, maze,
 	    thread_data->maze_port, thread_data->hostname);
 
-    exit(ret_status);
+    return((void *)ret_status));
 }
 
-int avatar(int avatar_id, mazestruct_t *maze, int maze_port, 
+
+/**************** avatar ****************/
+int avatar(int avatar_id, mazestruct_t *maze, int maze_port,
 	char *hostname) {
 
     //declarations
@@ -87,18 +90,34 @@ int avatar(int avatar_id, mazestruct_t *maze, int maze_port,
     Avatar *my_avatar = initialize_avatar(avatar_id);
 
     if (msg_buff == NULL || my_avatar == NULL) {
-	perror("Malloc error. Avatartest couldn't be run.\n");
-	ret_status = MALLOC_ERROR;
+	     perror("Malloc error. Avatartest couldn't be run.\n");
+	      ret_status = MALLOC_ERROR;
     }
-    else if ((ret_status = connect_to_server(comm_sock, hostname, mazeport) 
+    else if ((ret_status = connect_to_server(comm_sock, hostname, maze_port)
 		!= SUCCESS)) {} //jump to clean up and exit
-    else if ((ret_status = send_am_read(my_avatar, msg_buff, comm_sock) 
+    else if ((ret_status = send_am_ready(my_avatar, msg_buff, comm_sock)
 		!= SUCCESS)) {
-	close(comm_sock); //then jump to clean up and exit
-    } 
+	     close(comm_sock); //then jump to clean up and exit
+    }
     else {
-	ret_status = solve_maze(my_avatar, maze, comm_sock);
-	close(comm_sock);
+      int bytes_read;
+      AM_Message turnReady;
+      if ((bytes_read = read(comm_sock, &turnReady, sizeof(AM_Message))) < 0)
+        perror("reading stream message");
+      else if (bytes_read == 0) {
+        printf("Ending connection\n");
+        return 1;
+      }
+      else {
+        if (ntohl(init_response->type) == AM_AVATAR_TURN) {
+          printf("It's your turn %d\n", avatar_id);
+        }
+        else {
+          printf("Code is %d\n", ntohl(init_response->type)); 
+        }
+      }
+	    //  ret_status = solve_maze(my_avatar, maze, comm_sock);
+	     close(comm_sock);
     }
 
     // clean up
@@ -106,7 +125,7 @@ int avatar(int avatar_id, mazestruct_t *maze, int maze_port,
     free(msg_buff);
     free(maze);
 
-    exit(ret_status);
+    return ret_status;
 }
 
 /*
@@ -118,16 +137,16 @@ static Avatar *initialize_avatar(int id) {
 	return NULL;
     }
     else {
-	avatar->fd = id;
-	return avatar;
+	     avatar->fd = id;
+	      return avatar;
     }
  }
 
 /*
- * Trys to connect to the server specified by hostname at port maze_port 
+ * Trys to connect to the server specified by hostname at port maze_port
  * 	using socket at address of comm_sock
  *
- * If successful then the given socket is properly connected to the given 
+ * If successful then the given socket is properly connected to the given
  * 	server
  *
  * Returns 0 if the operation was successful and positive integer error codes
@@ -160,7 +179,7 @@ static int connect_to_server(int *comm_sock, char *hostname, int maze_port) {
     //try to connect to server
     if (connect(*comm_sock,(struct sockaddr*)&server, sizeof(server)) < 0) {
     	perror("Connection to server failed.\n");
-    	ret_status = FAILED_CONNECTION; 
+    	ret_status = FAILED_CONNECTION;
     }
     return SUCCESS;
 }
@@ -168,58 +187,64 @@ static int connect_to_server(int *comm_sock, char *hostname, int maze_port) {
 /*
  * Sends the AM_AVATAR_READY message using the given comm_sock and msg_buff
  */
-static int send_am_avatar_ready(Avatar *my_avatar, AM_message *msg_buff, 
+static int send_am_avatar_ready(Avatar *my_avatar, AM_message *msg_buff,
 	int comm_sock) {
 
     //form AM_AVATAR_READY message to send to server
     msg_buff->type = htonl(AM_AVATAR_READY);
     msg_buff->AvatarID = htonl(my_avatar->fd);
 
-    //send message to server
-    if (write(comm_sock, &my_move, sizeof(my_move)) < 0)  {
-	perror("Error writing avatar %d's move to server.\n", avatar->id);
-	return MESSAGE_FAILED_TO_BE_WRITTEN; 
+    if (write(comm_sock, msg_buff, sizeof(AM_message)) < 0)  {
+      perror("Error sending AM_AVATAR_READY\n");
+      return MESSAGE_FAILED_TO_BE_WRITTEN;
     }
     return SUCCESS;
+
+    // //send message to server
+    // if (write(comm_sock, &my_move, sizeof(my_move)) < 0)  {
+	  //    perror("Error writing avatar %d's move to server.\n", avatar->id);
+	  //     return MESSAGE_FAILED_TO_BE_WRITTEN;
+    // }
+    // return SUCCESS;
 }
 
 /*
  * Method run by threads once everything is set up to solve the maze
  */
-static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock){
-    
-    wait_for_response(comm_sock, msg_buff);
-
-    //try to solve the maze
-    while (msg_buff->type == AM_AVATAR_TURN) {
-	//update avatar position based on response
-	my_avatar->pos = ntohl(msg_buff->Pos[my_avatar->fd]);
-	//if it is your turn...
-	if (ntohl(msg_buff->id) == my_avatar->id) {
-	    pthread_mutex_lock(&my_turn); //make sure no one else can go
-	    make_move(maze, my_avatar, comm_sock, server);
-	    pthread_mutex_unlock(&my_turn); //allow next person to go
-	}
-	else {
-	    wait_for_response(comm_sock, msg_buff);
-	}
-    }
-    
-    // once loop is ended, either maze has been solved or an error occured
-    switch (msg_buff->type) {
-	case (AM_MAZE_SOLVED):
-	    printf("The maze was solved!!!!\n");
-	    ret_status = SUCCESS;
-	    break;
-	default: 
-	    if (IS_AM_ERROR(msg_buff)) {
-		perror("Error %d.\n", msg_buff->type);
-		ret_status = FAILED;
-	    }
-	    else {
-		perror("Who knows what happened.\n");
-		ret_status = UNCLEAR;
-	    }
-    }
-    return ret_status;
-}
+// static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock){
+//
+//     wait_for_response(comm_sock, msg_buff);
+//
+//     //try to solve the maze
+//     while (msg_buff->type == AM_AVATAR_TURN) {
+// 	//update avatar position based on response
+// 	my_avatar->pos = ntohl(msg_buff->Pos[my_avatar->fd]);
+// 	//if it is your turn...
+// 	if (ntohl(msg_buff->id) == my_avatar->id) {
+// 	    pthread_mutex_lock(&my_turn); //make sure no one else can go
+// 	    make_move(maze, my_avatar, comm_sock, server);
+// 	    pthread_mutex_unlock(&my_turn); //allow next person to go
+// 	}
+// 	else {
+// 	    wait_for_response(comm_sock, msg_buff);
+// 	}
+//     }
+//
+//     // once loop is ended, either maze has been solved or an error occured
+//     switch (msg_buff->type) {
+// 	case (AM_MAZE_SOLVED):
+// 	    printf("The maze was solved!!!!\n");
+// 	    ret_status = SUCCESS;
+// 	    break;
+// 	default:
+// 	    if (IS_AM_ERROR(msg_buff)) {
+// 		perror("Error %d.\n", msg_buff->type);
+// 		ret_status = FAILED;
+// 	    }
+// 	    else {
+// 		perror("Who knows what happened.\n");
+// 		ret_status = UNCLEAR;
+// 	    }
+//     }
+//     return ret_status;
+// }

@@ -1,6 +1,7 @@
 # Makefile for maze
 #
 # Larissa Chen August 2016
+# Team core_dumped_in_a_maze
 
 PROG = AMStartup
 OBJS = AMStartup.o
@@ -15,7 +16,7 @@ $(PROG): $(OBJS) $(LLIBS)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # crawler source dependencies; add others as needed
-AMStartup.o: amazing.h
+AMStartup.o: amazing.h thread_ops.h
 
 # build the library
 ../lib/lib.a:

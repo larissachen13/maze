@@ -1,7 +1,7 @@
 /*
  * avatar.c
  * Name: Benjamin Littlejohn
- * Team: core_dumped_in_a_maze 
+ * Team: core_dumped_in_a_maze
  * Date: August 2016
  * Purpose: Module of cs50 X16 project Maze Challenge
  * See avatar.h for details
@@ -22,7 +22,7 @@
 
 /**************************** global functions *****************************/
 /*
- * Method to move a given avatar  
+ * Method to move a given avatar
  * See avatar.h for full description
  */
 void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock) {
@@ -51,23 +51,23 @@ void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock) {
  */
 void wait_for_response(int comm_sock, AM_Message *msg_buff) {
     if ((read(comm_sock, *msg_buff, sizeof(AM_Message))) < 0) {
-	perror("Error reading message from server.\n");
+	     perror("Error reading message from server.\n");
     }
 }
 
 /*
- * Updates the shared map of the maze based on an avatar's last move, former 
+ * Updates the shared map of the maze based on an avatar's last move, former
  * 	position, and current positon
  */
 void update_maze(mazestruct *maze, XYPos old_pos, int move, Avatar *avatar) {
     //if move failed add a wall to the maze at that spot
     if ((move != NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
-	insert_wall(maze, avatar->pos.x, avatar->pos.y, move); 
+	insert_wall(maze, avatar->pos.x, avatar->pos.y, move);
     }
     //otherwise...
     else {
 	//update maze with new avatar position
-	update_location(maze, old_pos.x, old_pos.y, avatar->pos.x, 
+	update_location(maze, old_pos.x, old_pos.y, avatar->pos.x,
 		avatar->pos.y, avatar->fd);
 	//if avatar was forced to backtrack it has reached a dead end
 	if (move == HAVE_TO_BACK_TRACK) {
@@ -83,7 +83,7 @@ void update_maze(mazestruct *maze, XYPos old_pos, int move, Avatar *avatar) {
 /**************************** local functions ******************************/
 /*
  * Determines an avatar's next move using the shared maze knowledge of all the
- * 	avatars and the avatar's current position 
+ * 	avatars and the avatar's current position
  */
 static int get_best_move(mazestruct_t *maze, XYPos my_pos) {
 
@@ -102,11 +102,11 @@ static int get_best_move(mazestruct_t *maze, XYPos my_pos) {
 /*
  * Helper method for get_best_move()
  *
- * Determines what an avatar should do if a path connecting all avatars is not 
+ * Determines what an avatar should do if a path connecting all avatars is not
  * 	yet discovered
  *
- * Algorithm: 
- * 	Run through all possible moves to see what priorities each satisfies 
+ * Algorithm:
+ * 	Run through all possible moves to see what priorities each satisfies
  * 	Choose the move that satisfies the highest priority
  *
  * See avatar.h for details on priorities
@@ -123,14 +123,14 @@ static int get_best_move_helper(mazestruct_t *maze, XYPos my_pos) {
 	    move_rank = DONT_DO_IT;
 	}
 	//if the move results in potentially meeting another avatar
-	else if (is_someone_adjacent(maze, my_pos.x, my_pos.y, move)) { 
+	else if (is_someone_adjacent(maze, my_pos.x, my_pos.y, move)) {
 	    move_rank = FIRST_PRIORITY;
 	}
 	//if the move results in potentially visiting an unvisited space
-	else if(!is_visited(maze, my_pos.x, my_pos.y, move)) { 
+	else if(!is_visited(maze, my_pos.x, my_pos.y, move)) {
 	    move_rank = SECOND_PRIORITY;
 	}
-	//if the move results in potentially visiting a space visited by 
+	//if the move results in potentially visiting a space visited by
 	//a different avatar
 	else if(!did_x_visit(maze, my_pos.x, my_pos.y, move, avatar->fd)) {
 	    move_rank = THIRD_PRIORITY;
@@ -174,7 +174,7 @@ static bool same_pos(XYPos old_pos, XYPos new_pos) {
 }
 
 /*
- * Test method that will eventually be replaced with actual method to bring 
+ * Test method that will eventually be replaced with actual method to bring
  * 	avatars together
  */
 static int come_together() {
@@ -182,4 +182,3 @@ static int come_together() {
     printf("Coming together!!!\n");
     return move;
 }
-

@@ -5,6 +5,7 @@
  * exit codes: 1 - invalid arguments
  *             2 - error in socket connections
  * Larissa Chen, August 2016
+ * Team: core_dumped_in_a_maze
  */
 
 #include <stdio.h>
@@ -15,10 +16,15 @@
 #include <getopt.h>
 #include <netdb.h>
 #include "amazing.h"
+#include "thread_ops.h"
 
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server);
 int recv_init_response(int comm_sock, AM_Message *init_response);
 
+
+/*
+ *  Main
+ */
 int main (int argc, char* argv[]) {
   char opt;
   int n, d;
@@ -28,11 +34,12 @@ int main (int argc, char* argv[]) {
   int comm_sock;
   struct sockaddr_in server;
   struct hostent *hostp;
-  bool error;
+  int error;
   AM_Message init_response;
   int maze_port;
   int maze_width, maze_height;
   FILE *logfile;
+  int avatar_success;
 
 
   // 1. Validate and parse arguments
@@ -112,14 +119,17 @@ int main (int argc, char* argv[]) {
   // 5. Create log file
   const int len = 400; //fix this
   char filename[len];
-  snprintf(filename, len, "Amazing_%s_%d_%d.log", getenv("User"), n, d);
+  snprintf(filename, len, "Amazing_%s_%d_%d.log", getenv("USER"), n, d);
   logfile = fopen(filename, "w");
   fclose(logfile);
+
+  // 6. Start the avatar threads
+  error = generate_avatars(n, maze_port, hostname);
 
   close(comm_sock);
 }
 
-
+/************ Defined Functions ***************/
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server) {
   AM_Message init_message;
   if (connect(comm_sock, (struct sockaddr *) &server, sizeof(server)) < 0) {
