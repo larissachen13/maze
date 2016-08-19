@@ -96,7 +96,7 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	Avatar *avatar) {
     //if move failed add a wall to the maze at that spot
     if ((move->direction != M_NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
-	insert_wall(maze, avatar->pos.x, avatar->pos.y, move->direction);
+	    insert_wall(maze, avatar->pos.x, avatar->pos.y, move->direction);
     }
     //otherwise...
     else {
@@ -104,7 +104,8 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	update_location(maze, old_pos.x, old_pos.y, avatar->pos.x,
 		avatar->pos.y, avatar->fd);
 	//if avatar was forced to backtrack it has reached a dead end
-	if (move->score == HAVE_TO_BACK_TRACK) {
+	if (move->score == HAVE_TO_BACK_TRACK && !is_someone_adjacent(maze, 
+		    avatar->pos.x, avatar->pos.y, 3 - move->direction)) {
 	    insert_dead_spot(maze, old_pos.x, old_pos.y);
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
@@ -157,7 +158,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	}
 	//if the move results in potentially meeting another avatar
 	//needs editing!!!!
-	else if (is_someone_adjacent(maze, avatar->pos.x, avatar->pos.y)) { //, move)) {
+	else if (is_someone_adjacent(maze, avatar->pos.x, avatar->pos.y, move)) {
 	    move_rank = FIRST_PRIORITY;
 	}
 	//if the move results in potentially visiting an unvisited space
