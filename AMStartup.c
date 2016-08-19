@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <netdb.h>
+#include <pthread.h>
 #include "amazing.h"
 #include "thread_ops.h"
 
@@ -124,7 +125,30 @@ int main (int argc, char* argv[]) {
   fclose(logfile);
 
   // 6. Start the avatar threads
-  error = generate_avatars(n, maze_port, hostname);
+  // error = generate_avatars(n, maze_port, hostname);
+
+  void *thread_status;
+  pthread_t avatars[AM_MAX_AVATAR];
+  thread_data_t *params;
+
+    // generate params to pass into each thread
+
+
+    for (int i = 0; i < n; i++) {
+      params = malloc(sizeof(thread_data_t));
+      params->maze_port = maze_port;
+      params->host_name = hostname;
+      params->id = i;
+      pthread_create(&avatars[i], NULL, avatar_thread, params);
+      if (avatars[i] != 0) {
+        //  return AVATAR_NOT_CREATED;
+      }
+      //free the params
+    }
+    for (int i = 0; i < n; i++) {
+       pthread_join(avatars[i], &thread_status);
+    }
+    return 1;
 
   close(comm_sock);
 }

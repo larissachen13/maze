@@ -28,6 +28,7 @@
 #include "mazestruct.h"
 #include "avatar.h"
 
+
 /******************* local structs *****************/
 typedef struct thread_data {
     int id;
@@ -43,21 +44,13 @@ static Avatar *initialize_avatar(int id);
 static int connect_to_server(int *comm_sock, char *hostname, int maze_port);
 static int send_am_avatar_ready(Avatar *my_avatar, AM_Message *msg_buff,
 	int comm_sock);
-static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
-	AM_Message *msg_buff);
+void wait_for_response(int comm_sock, AM_Message *msg_buff);
+// static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
+// 	AM_Message *msg_buff);
 
 /***************** global variables ****************/
 //thread_mutex_t my_turn;
 mazestruct_t *maze;
-
-int main(int argc, char *argv[]) {
-    //still need to fill in
-  //  my_turn = PTHREAD_MUTEX_INITIALIZER;
-    //maze = maze_new();
-    generate_avatars(atoi(argv[1]), atoi(argv[2]), argv[3]);
-
-    return SUCCESS;
-}
 
 /**************** generate_avatars ****************/
 int generate_avatars(int num_avatars, int maze_port, char *host_name) {
@@ -69,30 +62,27 @@ int generate_avatars(int num_avatars, int maze_port, char *host_name) {
     params.maze_port = maze_port;
     params.host_name = host_name;
 
-    int i;
-
-    for (i = 0; i < num_avatars; i++) {
-	params.id = i;
-	pthread_create(&avatars[i], NULL, avatar_thread, &params);
-	if (avatars[i] != 0) {
-	    return AVATAR_NOT_CREATED;
-	}
+    for (int i = 0; i < num_avatars; i++) {
+	     params.id = i;
+	      pthread_create(&avatars[i], NULL, avatar_thread, &params);
+	      if (avatars[i] != 0) {
+	         return AVATAR_NOT_CREATED;
+	      }
     }
-    for (i = 0; i < num_avatars; i++) {
-	pthread_join(avatars[i], NULL);
+    for (int i = 0; i < num_avatars; i++) {
+	     pthread_join(avatars[i], &thread_status);
     }
     return SUCCESS;
 }
 
 /**************** avatar_thread ****************/
 void *avatar_thread(void *params) {
+  thread_data_t *thread_data = (thread_data_t *)params;
 
-    thread_data_t *thread_data = (thread_data_t *)params;
+  int ret_status = avatar(thread_data->id, maze,
+	  thread_data->maze_port, thread_data->host_name);
 
-    int ret_status = avatar(thread_data->id, maze,
-	    thread_data->maze_port, thread_data->host_name);
-
-    return((void *)ret_status);
+  return((void *)ret_status);
 }
 
 /**************** avatar ****************/
@@ -118,8 +108,14 @@ int avatar(int avatar_id, mazestruct_t *maze, int maze_port,
 	     close(comm_sock); //then jump to clean up and exit
     }
     else {
-//	ret_status = solve_maze(my_avatar, maze, comm_sock);
-	close(comm_sock);
+      wait_for_response(comm_sock, msg_buff);
+      if(ntohl(msg_buff->type) == AM_AVATAR_TURN) {
+        printf("It's your turn %d\n", (ntohl((msg_buff->avatar_turn).TurnId)));
+      } else {
+        printf("Message type is: %d\n", ntohl(msg_buff->type));
+      }
+      //	ret_status = solve_maze(my_avatar, maze, comm_sock);
+	     close(comm_sock);
     }
 
     // clean up
@@ -166,17 +162,17 @@ static int connect_to_server(int *comm_sock, char *hostname, int maze_port) {
 
     //make sure initializations worked
     if (*comm_sock < 0) {
-	perror("Error creating communication socket.\n");
-	return SOCKET_NOT_CREATED;
+	     perror("Error creating communication socket.\n");
+	      return SOCKET_NOT_CREATED;
     }
     else if (hostp == NULL) {
-	fprintf(stderr, "%s: unknown host", hostname);
-	return UNKNOWN_HOST;
+	     fprintf(stderr, "%s: unknown host\n", hostname);
+	     return UNKNOWN_HOST;
     }
 
     //initialize server
     server.sin_family = AF_INET;
-    server.sin_port = maze_port;
+    server.sin_port = htons(maze_port);
     memcpy(&server.sin_addr, hostp->h_addr_list[0], hostp->h_length);
 
     //try to connect to server
@@ -200,11 +196,11 @@ static int send_am_avatar_ready(Avatar *my_avatar, AM_Message *msg_buff,
 
     //send message to server
     if (write(comm_sock, msg_buff, sizeof(AM_Message)) < 0) {
-	fprintf(stderr, "Error writing avatar %d's move to server.\n",
-		my_avatar->fd);
-	return MESSAGE_FAILED_TO_BE_WRITTEN;
+	     fprintf(stderr, "Error writing avatar %d's move to server.\n",
+		     my_avatar->fd);
+         return MESSAGE_FAILED_TO_BE_WRITTEN;
     }
-    printf("Avatar %d sent AM_AVATAR_READY.", my_avatar->fd);
+    printf("Avatar %d sent AM_AVATAR_READY.\n", my_avatar->fd);
     return SUCCESS;
 }
 
@@ -252,3 +248,10 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     return ret_status;
 }
 */
+
+
+void wait_for_response(int comm_sock, AM_Message *msg_buff) {
+    if ((read(comm_sock, msg_buff, sizeof(AM_Message))) < 0) {
+	     perror("Error reading message from server.\n");
+    }
+}
