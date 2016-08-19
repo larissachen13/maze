@@ -11,7 +11,11 @@
 #ifndef __THREAD_OPS_H
 #define __THREAD_OPS_H
 
-typedef struct thread_data thread_data_t;
+typedef struct thread_data {
+    int id;
+    int maze_port;
+    char *host_name;
+} thread_data_t;
 
 /**************** generate_avatars ****************/
 /*
@@ -26,28 +30,8 @@ int generate_avatars(int num_avatars, int maze_port, char *host_name);
 /*
  * Helper function that calls main function for each thread. Maps params struct
  * to individual parameters to pass into main function "avatar".
- * Returns error or success code from "avatar". 
+ * Returns error or success code from "avatar".
  */
-void *avatar_thread(void *params)
-
-/*
-return data for the given key, or NULL if not found
-*/
-void *hashtable_find(hashtable_t *ht, char *key);
-
-/*
-return false if key already exists, and true if new item was inserted.
-If ht is NULL, or you encounter other error, return false.
-*/
-bool hashtable_insert(hashtable_t *ht, char *key, void *data);
-
-/* Iterate over all items in hashtable (in undefined order):
- * call itemfunc for each item, with (arg, key, data).
- */
-void hashtable_iterate(hashtable_t *ht,
-		       void (*itemfunc)(void *arg, const char *key,void *data),
-		       void *arg);
-
-void hashtable_delete(hashtable_t* ht);
+void *avatar_thread(void *params);
 
 #endif

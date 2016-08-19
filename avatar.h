@@ -1,7 +1,7 @@
 /*
  * avatar.h - header file for avatar.c
  * Name: Benjamin Littlejohn
- * Team: core_dumped_in_a_maze 
+ * Team: core_dumped_in_a_maze
  * Date: August 2016
  * Purpose: Module of cs50 X16 project Maze Challenge
  */
@@ -18,16 +18,16 @@
 /*
  * Method to move an avatar so it can solve the Maze Challenge
  *
- * Input: 
+ * Input:
  * 	maze - database shared betweeen all avatars storing what is currently
- * 	       known about the maze 
+ * 	       known about the maze
  * 	avatar - avatar that is making a move
  *
  * Algorithm:
  * 	If there is a known route between all avatars...
  * 	Follow the route to bring all avatars together
  *	If a path connecting all avatars is not yet discovered...
- * 	Run through all possible moves to see what priorities each satisfies 
+ * 	Run through all possible moves to see what priorities each satisfies
  * 	Choose the move that satisfies the highest priority
  *
  * Priorities:
@@ -49,9 +49,9 @@ void make_move(mazestruct_t *maze, Avatar avatar, int comm_sock);
 void wait_for_response(int comm_sock, AM_Message *msg_buff);
 
 /*
- * Updates the shared map of the maze based on an avatar's last move, former 
+ * Updates the shared map of the maze based on an avatar's last move, former
  * 	position, and current positon
  */
-void update_maze(mazestruct *maze, XYPos old_pos, int move, Avatar *avatar);
+void update_maze(mazestruct_t *maze, XYPos old_pos, int move, Avatar *avatar);
 
 #endif

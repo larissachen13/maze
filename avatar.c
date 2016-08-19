@@ -59,7 +59,7 @@ void wait_for_response(int comm_sock, AM_Message *msg_buff) {
  * Updates the shared map of the maze based on an avatar's last move, former
  * 	position, and current positon
  */
-void update_maze(mazestruct *maze, XYPos old_pos, int move, Avatar *avatar) {
+void update_maze(mazestruct_t *maze, XYPos old_pos, int move, Avatar *avatar) {
     //if move failed add a wall to the maze at that spot
     if ((move != NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
 	insert_wall(maze, avatar->pos.x, avatar->pos.y, move);
