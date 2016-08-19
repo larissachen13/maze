@@ -163,6 +163,7 @@ int main (int argc, char* argv[]) {
       }
   }
   //delete maze
+  delete_maze(maze);
   //free the params
   close(comm_sock);
   exit(0);

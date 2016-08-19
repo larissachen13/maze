@@ -76,6 +76,7 @@ void *avatar_thread(void *params) {
   int ret_status = run_avatar_thread(thread_data->id, maze,
 	  thread_data->maze_port, thread_data->host_name);
 
+  free(thread_data);
   return((void *)ret_status);
 }
 
