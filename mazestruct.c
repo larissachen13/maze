@@ -4,13 +4,6 @@
 * Created by Benji Hannam, 2016 for use in Team Core Dumped in a Maze for CS50
 */
 
-//DEVELOPMENT NOTES
-/*
-* Add in an array to hold the avatar locations for each avatar when needed
-*
-*/
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -20,13 +13,17 @@
 
 /************************* local types **********************/
 typedef struct spot {
+	//bools for the walls
 	bool north;
 	bool south;
 	bool east;
 	bool west;
+	//bools for states of the spot
 	bool avatar;
 	bool dead;
 	bool visited;
+	//arrays for more information on the spots
+	int avatar_number[10];
 	int visited_by[10];
 } spot_t;
 
@@ -61,9 +58,15 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 				printf("Error allocaitng memory to a new spot struct, exiting..\n");
 				exit(2);
 			}
+			//initialise the variables in spot
 			new_spot->avatar = false;
 			new_spot->dead = false;
 			new_spot->visited = false;
+			//initialise the array
+			for(int i = 0; i < 10; i++){
+				new_spot->avatar_number[i] = 0;
+			}
+			
 			for(int i = 0; i < 10; i++){
 				new_spot->visited_by[i] = 0;
 			}
@@ -104,49 +107,52 @@ void maze_print(mazestruct_t *maze){
 
 	printf("   ");
 	for (int i = 0; i < maze->width; i ++){
-		printf("  %-2d ", i);
+		printf("  %-2d", i);
 	}
 	printf("\n");
+
+	//print the top edge
+	printf("   ");
+	for (int j = 0; j < maze->width; j++){
+		if(maze->map[j][0]->north){
+			printf("+---");
+		}
+		//otherwise print nothing
+		else{
+			printf("+   +");
+		}
+	}
+	printf("+");
 
 	//loop through each row
 	for (int i = 0; i < maze->height; i++){
 
-		//print any north walls
-		printf("   ");
-		for (int j = 0; j < maze->width; j++){
-			if(maze->map[j][i]->north){
-				printf("+---+");
-			}
-			//otherwise print nothing
-			else{
-				printf("+   +");
-			}
-		}
 		printf("\n");
 		printf("%-3d", i);
-		//print any east, west walls or avatars
+		//print the east wall
+		printf("|");
+		// print the west walls or avatars
 		for (int j = 0; j < maze->width; j++){
 
-			if(maze->map[j][i]->west){
-				printf("| ");
-			}
-			else{
-				printf("  ");
-			}
 			if(maze->map[j][i]->avatar){
-				printf("A");
+				for(int n = 0; n < 10; n++){
+					if(maze->map[j][i]->avatar_number[n] == 1){
+						printf(" %d ", i);
+						break;
+					}
+				}
 			}
 			else if(maze->map[j][i]->dead){
-				printf("D");
+				printf(" D ");
+			}
+			else{
+				printf("   ");
+			}
+			if(maze->map[j][i]->east){
+				printf("|");
 			}
 			else{
 				printf(" ");
-			}
-			if(maze->map[j][i]->east){
-				printf(" |");
-			}
-			else{
-				printf("  ");
 			}
 		}
 		printf("\n   ");
@@ -154,24 +160,32 @@ void maze_print(mazestruct_t *maze){
 		//print any south walls
 		for (int j = 0; j < maze->width; j++){
 			if(maze->map[j][i]->south){
-				printf("+---+");
+				printf("+---");
 			}
 			//otherwise print nothing
 			else{
-				printf("+   +");
+				printf("+   ");
 			}
 		}
-		printf("\n");
+		printf("+");
 	}
 	printf("\n");
 }
 
 /**************** place_avatar() ****************/
 void place_avatar(mazestruct_t *maze, int x, int y, int avatar_number){
-	if(x < maze->width && y < maze->width){
+	//if we are within bounds
+	if(x < maze->width && y < maze->width && x > -1 && y > -1){
+		//mark the spot appropriately
 		maze->map[x][y]->avatar = true;
 		maze->map[x][y]->visited = true;
 		maze->map[x][y]->visited_by[avatar_number] = 1;
+		maze->map[x][y]->avatar_number[avatar_number] = 1;
+		//print the update
+		printf("\n********************************************************************************\n");
+		printf("Inserted avatar %d at %d,%d.\n", avatar_number, x, y);
+		maze_print(maze);
+		printf("********************************************************************************\n");
 	}
 	else{
 		printf("Avatar location is off the maze.\n");
@@ -183,21 +197,34 @@ void place_avatar(mazestruct_t *maze, int x, int y, int avatar_number){
 /**************** insert_wall() ****************/
 void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 
-	if(x > maze->width || y > maze->height || x < 0 || y < 0){
+	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
 		printf("Coordinates are out of range\n");
 		return;
 	}
+
+	//if not marking as dead
+	if(!maze->map[x][y]->dead){
+		printf("\n********************************************************************************\n");
+	}
+
 	if(direction == 0){
 		//set the west wall and the east wall of the spot to the left
 		maze->map[x][y]->west = true;
 		if(y > 0){
 			maze->map[x -1][y]->east = true;
 		}
+		if(!maze->map[x][y]->dead){
+			printf("Inserted west wall at %d,%d.\n", x, y);
+		}
 	}
 	if(direction == 1){
+		//set the north wall and the south wall of the spot;
 		maze->map[x][y]->north = true;
 		if(y > 0){
 			maze->map[x][y - 1]->south = true;
+		}
+		if(!maze->map[x][y]->dead){
+			printf("Inserted north wall at %d,%d.\n", x, y);
 		}
 	}
 	if(direction == 2){
@@ -206,6 +233,9 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		if(y < (maze->height - 1)){
 			maze->map[x][y + 1]->north = true;
 		}
+		if(!maze->map[x][y]->dead){
+			printf("Inserted south wall at %d,%d.\n", x, y);
+		}
 	}
 	if(direction == 3){
 		//set the east wall and the west wall of the spot to the right
@@ -213,6 +243,15 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		if(x < (maze->width - 1)){
 			maze->map[x + 1][y]->west = true;
 		}
+		if(!maze->map[x][y]->dead){
+			printf("Inserted east wall at %d,%d.\n", x, y);
+		}
+	}
+
+	//if we arent marking it as dead
+	if(!maze->map[x][y]->dead){
+		maze_print(maze);
+		printf("********************************************************************************\n");
 	}
 
 }
@@ -220,7 +259,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 /**************** visited_spot() ****************/
 void visited_spot(mazestruct_t *maze, int x, int y, int avatar_number){
 
-	if(x > maze->width || y > maze->height || x < 0 || y < 0){
+	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
 		printf("Coordinates are out of range\n");
 		return;
 	}
@@ -236,11 +275,13 @@ void visited_spot(mazestruct_t *maze, int x, int y, int avatar_number){
 /**************** insert_dead_spot() ****************/
 void insert_dead_spot(mazestruct_t *maze, int x,int y){
 
-	if(x > maze->width || y > maze->height || x < 0 || y < 0){
-		printf("Coordinates are out of range\n");
+	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
+		printf("Coordinates are out of range, could not insert dead spot.\n");
 		return;
 	}
 	else{
+		//mark as dead
+		maze->map[x][y]->dead = true;
 		//add west wall
 		insert_wall(maze, x, y, 0);
 		//add north wall
@@ -250,20 +291,20 @@ void insert_dead_spot(mazestruct_t *maze, int x,int y){
 		//add east wall
 		insert_wall(maze, x, y, 3);
 
-		//make as dead
-		maze->map[x][y]->dead = true;
 	}
 
+	printf("\n********************************************************************************\n");
+	printf("Inserted dead spot at %d,%d.\n", x, y);
+	maze_print(maze);
+	printf("********************************************************************************\n");
 }
-
-//get_visited
 
 /**************** check_wall() ****************/
 bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 
 	//check coords
-	if(x > maze->width || y > maze->height || x < 0 || y < 0){
-		printf("Coordinates are out of range\n");
+	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
+		printf("Coordinates are out of range, cannot check wall.\n");
 		return false;
 	}
 	//return east wall status
@@ -298,7 +339,7 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 int is_someone_adjacent(mazestruct_t *maze, int x, int y){
 
 	//check coords
-	if(x > maze->width || y > maze->height || x < 0 || y < 0){
+	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
 		printf("Coordinates are out of range\n");
 		return -1;
 	}
@@ -335,21 +376,39 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y){
 void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int new_y, int avatar_number){
 
 	//check the initial coords
-	if(init_x > maze->width || init_y > maze->height || init_x < 0 || init_y < 0){
-		printf("Initial coordinates are out of range\n");
+	if(init_x > (maze->width - 1) || init_y > (maze->height - 1) || init_x < 0 || init_y < 0){
+		printf("Initial coordinates are out of range, did not update_location.\n");
 		return;
 	}
 
 	//check the new coords
-	if(new_x > maze->width || new_y > maze->height || new_x < 0 || new_y < 0){
-		printf("New coordinates are out of range\n");
+	if(new_x > (maze->width - 1) || new_y > (maze->height - 1) || new_x < 0 || new_y < 0){
+		printf("New coordinates are out of range, did not update location.\n");
 		return;
 	}
 
+	//update the initial spot
+	maze->map[init_x][init_y]->avatar_number[avatar_number] = 0;
+	//assume there are no more avatars at that spot
 	maze->map[init_x][init_y]->avatar = false;
+	//check if there are more and set the bool to true if so
+	for(int i = 0; i < 10; i++){
+		if(maze->map[init_x][init_y]->avatar_number[i] == 1){
+			maze->map[init_x][init_y]->avatar = true;
+			break;
+		}
+	}
+
+	//update the new spot
 	maze->map[new_x][new_y]->avatar = true;
 	maze->map[new_x][new_y]->visited = true;
 	maze->map[new_x][new_y]->visited_by[avatar_number] = 1;
+	maze->map[new_x][new_y]->avatar_number[avatar_number] = 1;
+
+	printf("\n********************************************************************************\n");
+	printf("Moved avatar %d from %d,%d to %d,%d.\n", avatar_number, init_x, init_y, new_x, new_y);
+	maze_print(maze);
+	printf("********************************************************************************\n");
 }
 
 /**************** is_visited() ****************/
