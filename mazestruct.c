@@ -67,6 +67,11 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 			new_spot->avatar = false;
 			new_spot->dead = false;
 			new_spot->visited = false;
+			//initialise the direction bools
+			new_spot->east = false;
+			new_spot->north = false;
+			new_spot->south = false;
+			new_spot->west = false;
 			//initialise the array
 			for(int i = 0; i < 10; i++){
 				new_spot->avatar_number[i] = 0;
