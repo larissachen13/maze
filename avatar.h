@@ -9,6 +9,7 @@
 /************* includes **************/
 #include "amazing.h"
 #include "mazestruct.h"
+#include <netdb.h>
 
 #ifndef _avatar_h_
 #define _avatar_h_
@@ -36,6 +37,21 @@
  * 	4. Visiting a space I have already visited
  * 	5. Don't run into a known wall!!!
  */
-void make_move(mazestruct_t *maze, Avatar avatar);
+void make_move(mazestruct_t *maze, Avatar avatar, int comm_sock);
+
+/*
+ * Waits until the server sends a message then reads it into the given
+ * 	message buffer
+ *
+ * Caller is responsible for allocating memory for the message buffer and
+ * 	freeing it
+ */
+void wait_for_response(int comm_sock, AM_Message *msg_buff);
+
+/*
+ * Updates the shared map of the maze based on an avatar's last move, former 
+ * 	position, and current positon
+ */
+void update_maze(mazestruct *maze, XYPos old_pos, int move, Avatar *avatar);
 
 #endif
