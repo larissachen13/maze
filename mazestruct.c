@@ -125,6 +125,7 @@ void maze_print(mazestruct_t *maze){
 
 	printf("   ");
 
+	//if the width of the maze is less that 45 make the width of each spot bigger
 	if(maze->width < 45){
 		for (int i = 0; i < maze->width; i ++){
 			printf("  %-2d", i);
@@ -191,6 +192,7 @@ void maze_print(mazestruct_t *maze){
 		}
 		printf("\n");
 	}
+	//if we have more than 45 columns in the maze then scale down the width of each spot by half
 	else{
 
 		for (int i = 0; i < maze->width; i ++){
@@ -405,7 +407,6 @@ void insert_dead_spot(mazestruct_t *maze, int x,int y){
 
 	printf("\n********************************************************************************\n");
 	printf("Inserted dead spot at %d,%d.\n", x, y);
-	maze->move_count++;
 	maze_print(maze);
 	printf("********************************************************************************\n");
 }
@@ -596,8 +597,10 @@ bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 void delete_maze(mazestruct_t *maze){
 
 	if(maze != NULL){
-
+		//print the total number of moves
 		printf("TOTAL NUMBER OF MOVES: %d\n", maze->move_count);
+
+		//go through each spot and free the memory associated with it
 		for (int i = 0; i < maze->width; i++){
 			for (int j = 0; j < maze->height; j++){
 				if(maze->map[i][j] != NULL){
