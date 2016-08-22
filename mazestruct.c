@@ -34,6 +34,7 @@ typedef struct mazestruct{
 	int height;
 	int width;
 	int num_avatars;
+	int move_count;
 
 } mazestruct_t;
 
@@ -108,6 +109,7 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 	new_maze->height = height;
 	new_maze->width = width;
 	new_maze->num_avatars = num_avatars;
+	new_maze->move_count = 0;
 
 	return new_maze;
 }
@@ -309,6 +311,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted west wall at %d,%d.\n", x, y);
+			maze->move_count++;
 		}
 	}
 	if(direction == 1){
@@ -319,6 +322,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted north wall at %d,%d.\n", x, y);
+			maze->move_count++;
 		}
 	}
 	if(direction == 2){
@@ -329,6 +333,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted south wall at %d,%d.\n", x, y);
+			maze->move_count++;
 		}
 	}
 	if(direction == 3){
@@ -339,6 +344,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted east wall at %d,%d.\n", x, y);
+			maze->move_count++;
 		}
 	}
 
@@ -399,6 +405,7 @@ void insert_dead_spot(mazestruct_t *maze, int x,int y){
 
 	printf("\n********************************************************************************\n");
 	printf("Inserted dead spot at %d,%d.\n", x, y);
+	maze->move_count++;
 	maze_print(maze);
 	printf("********************************************************************************\n");
 }
@@ -519,6 +526,7 @@ void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int 
 
 	printf("\n********************************************************************************\n");
 	printf("Moved avatar %d from %d,%d to %d,%d.\n", avatar_id, init_x, init_y, new_x, new_y);
+	maze->move_count++;
 	maze_print(maze);
 	printf("********************************************************************************\n");
 }
@@ -589,6 +597,7 @@ void delete_maze(mazestruct_t *maze){
 
 	if(maze != NULL){
 
+		printf("TOTAL NUMBER OF MOVES: %d\n", maze->move_count);
 		for (int i = 0; i < maze->width; i++){
 			for (int j = 0; j < maze->height; j++){
 				if(maze->map[i][j] != NULL){
