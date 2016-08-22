@@ -163,7 +163,6 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	}
 	//if the move results in potentially visiting an unvisited space
 	else if(!is_visited(maze, avatar->pos.x, avatar->pos.y, direction)) {
-	    printf("Direction %d is unvisited.\n", direction);
 	    move_rank = SECOND_PRIORITY;
 	}
 	//if the move results in potentially visiting a space visited by

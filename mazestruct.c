@@ -122,70 +122,140 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 void maze_print(mazestruct_t *maze){
 
 	printf("   ");
-	for (int i = 0; i < maze->width; i ++){
-		printf("  %-2d", i);
-	}
-	printf("\n");
 
-	//print the top edge
-	printf("   ");
-	for (int j = 0; j < maze->width; j++){
-		if(maze->map[j][0]->north){
-			printf("+---");
+	if(maze->width < 45){
+		for (int i = 0; i < maze->width; i ++){
+			printf("  %-2d", i);
 		}
-		//otherwise print nothing
-		else{
-			printf("+   +");
-		}
-	}
-	printf("+");
-
-	//loop through each row
-	for (int i = 0; i < maze->height; i++){
-
 		printf("\n");
-		printf("%-3d", i);
-		//print the east wall
-		printf("|");
-		// print the west walls or avatars
-		for (int j = 0; j < maze->width; j++){
 
-			if(maze->map[j][i]->avatar){
-				for(int n = 0; n < 10; n++){
-					if(maze->map[j][i]->avatar_number[n] == 1){
-						printf(" %d ", n);
-						break;
-					}
-				}
-			}
-			else if(maze->map[j][i]->dead){
-				printf(" D ");
-			}
-			else{
-				printf("   ");
-			}
-			if(maze->map[j][i]->east){
-				printf("|");
-			}
-			else{
-				printf(" ");
-			}
-		}
-		printf("\n   ");
-
-		//print any south walls
+		//print the top edge
+		printf("   ");
 		for (int j = 0; j < maze->width; j++){
-			if(maze->map[j][i]->south){
+			if(maze->map[j][0]->north){
 				printf("+---");
 			}
 			//otherwise print nothing
 			else{
-				printf("+   ");
+				printf("+   +");
 			}
 		}
 		printf("+");
+
+		//loop through each row
+		for (int i = 0; i < maze->height; i++){
+
+			printf("\n");
+			printf("%-3d", i);
+			//print the east wall
+			printf("|");
+			// print the west walls or avatars
+			for (int j = 0; j < maze->width; j++){
+
+				if(maze->map[j][i]->avatar){
+					for(int n = 0; n < 10; n++){
+						if(maze->map[j][i]->avatar_number[n] == 1){
+							printf(" %d ", n);
+							break;
+						}
+					}
+				}
+				else if(maze->map[j][i]->dead){
+					printf(" D ");
+				}
+				else{
+					printf("   ");
+				}
+				if(maze->map[j][i]->east){
+					printf("|");
+				}
+				else{
+					printf(" ");
+				}
+			}
+			printf("\n   ");
+
+			//print any south walls
+			for (int j = 0; j < maze->width; j++){
+				if(maze->map[j][i]->south){
+					printf("+---");
+				}
+				//otherwise print nothing
+				else{
+					printf("+   ");
+				}
+			}
+			printf("+");
+		}
+		printf("\n");
 	}
-	printf("\n");
+	else{
+
+		for (int i = 0; i < maze->width; i ++){
+			printf(" %-2d", i);
+		}
+		printf("\n");
+
+		//print the top edge
+		printf("   ");
+		for (int j = 0; j < maze->width; j++){
+			if(maze->map[j][0]->north){
+				printf("+-");
+			}
+			//otherwise print nothing
+			else{
+				printf("+ +");
+			}
+		}
+		printf("+");
+
+		//loop through each row
+		for (int i = 0; i < maze->height; i++){
+
+			printf("\n");
+			printf("%-3d", i);
+			//print the east wall
+			printf("|");
+			// print the west walls or avatars
+			for (int j = 0; j < maze->width; j++){
+
+				if(maze->map[j][i]->avatar){
+					for(int n = 0; n < 10; n++){
+						if(maze->map[j][i]->avatar_number[n] == 1){
+							printf("%d", n);
+							break;
+						}
+					}
+				}
+				else if(maze->map[j][i]->dead){
+					printf("D");
+				}
+				else{
+					printf(" ");
+				}
+				if(maze->map[j][i]->east){
+					printf("|");
+				}
+				else{
+					printf(" ");
+				}
+			}
+			printf("\n   ");
+
+			//print any south walls
+			for (int j = 0; j < maze->width; j++){
+				if(maze->map[j][i]->south){
+					printf("+-");
+				}
+				//otherwise print nothing
+				else{
+					printf("+ ");
+				}
+			}
+			printf("+");
+		}
+		printf("\n");
+	}
 }
 
 /**************** place_avatar() ****************/
