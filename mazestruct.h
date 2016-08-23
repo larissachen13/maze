@@ -127,6 +127,13 @@ void delete_maze(mazestruct_t *maze);
 */
 void remove_leader(mazestruct_t *maze);
 
+/**************** insert_last_move() ****************/
+/*
+* updates the last move for an avatar
+* 
+*/
+void insert_last_move(mazestruct_t *maze, int direction, int score, int avatar_id);
+
 /**************** get_last_direction() ****************/
 /*
 * Returns the last direction in which an avatar moved
