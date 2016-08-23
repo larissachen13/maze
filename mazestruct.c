@@ -654,6 +654,12 @@ void delete_maze(mazestruct_t *maze){
 				}
 			}
 		}
+
+		for(int m = 0; m < 10; m++){
+			if(maze->last_move[m] != NULL){
+				free(maze->last_move[m]);
+			}
+		}
 		free(maze);
 	}
 }
