@@ -1,4 +1,4 @@
-/* 
+/*
 * A structure file to hold the available information about the maze
 *
 * Created by Benji Hannam, 2016 for use in Team Core Dumped in a Maze for CS50
@@ -45,7 +45,7 @@ typedef struct mazestruct{
 	int number_leaders;
 	avatar_move* last_move[10];
 	int leader_array[10];
-
+	int *crossed_with[10];
 } mazestruct_t;
 
 
@@ -87,7 +87,7 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 			for(int i = 0; i < 10; i++){
 				new_spot->avatar_number[i] = 0;
 			}
-			
+
 			for(int i = 0; i < 10; i++){
 				new_spot->visited_by[i] = 0;
 			}
@@ -136,15 +136,30 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 		//initialise leader array
 		new_maze->leader_array[i] = i;
 	}
+
+	// initialize crossed_with array
+	for (int i = 0; i < num_avatars; i++) {
+		// allocate each avatar's connected array
+		int *connected_pointer = malloc(num_avatars*sizeof(int));
+		for (int j = 0; j < num_avatars; j++) {
+			if (j == i)
+				connected_pointer[j] = 1;
+			else
+				connected_pointer[j] = 0;
+		}
+
+		new_maze->crossed_with[i] = connected_pointer;
+	}
+
 	return new_maze;
 }
 
 /**************** maze_print() ****************/
 /*
-* Prints out the 2D representation of the maze. 
+* Prints out the 2D representation of the maze.
 * Prints from left to right and top to bottom going row by row.
 * If there are two avatars on the same spot it will print the lowest numbers avatar.
-* 
+*
 */
 void maze_print(mazestruct_t *maze){
 
@@ -391,7 +406,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 /*
 * Marks a spot as being visited by an avatar.
 * Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar that visited it.
-* 
+*
 */
 void visited_spot(mazestruct_t *maze, int x, int y, int avatar_number){
 
@@ -411,7 +426,7 @@ void visited_spot(mazestruct_t *maze, int x, int y, int avatar_number){
 /*
 * Marks a spot as being dead.
 * Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar that visited it.
-* 
+*
 */
 void insert_dead_spot(mazestruct_t *maze, int x,int y){
 
@@ -456,7 +471,7 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 	}
 	//return east wall status
 	if(direction == 0){
-		
+
 		return maze->map[x][y]->west;
 	}
 	//return north wall status
@@ -466,13 +481,13 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 	}
 	//return south wall status
 	else if(direction == 2){
-	
+
 		return maze->map[x][y]->south;
-		
+
 	}
 	//return west wall status
 	else if(direction == 3){
-		
+
 		return maze->map[x][y]->east;
 	}
 	else{
@@ -501,17 +516,17 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 			 if (maze->map[x - 1][y]->avatar_number[i] == 1){
 			 	return i;
 			 }
-		} 
+		}
 		return -1;
 	}
 	//east spot
 	else if(direction == 3 && (x < (maze->width - 1))){
-		
+
 		for(int i = 0; i < maze->num_avatars; i++){
 			 if (maze->map[x + 1][y]->avatar_number[i] == 1){
 			 	return i;
 			 }
-		} 
+		}
 		return -1;
 	}
 	//north spot
@@ -521,7 +536,7 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 			 if (maze->map[x][y - 1]->avatar_number[i] == 1){
 			 	return i;
 			 }
-		} 
+		}
 		return -1;
 	}
 	//south spot
@@ -531,7 +546,7 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 			 if (maze->map[x][y + 1]->avatar_number[i] == 1){
 			 	return i;
 			 }
-		} 
+		}
 		return -1;
 	}
 	else{
@@ -616,7 +631,7 @@ bool is_visited(mazestruct_t *maze, int x, int y, int direction){
 
 /**************** did_x_visit() ****************/
 /*
-* Checks if a spot denoted by a direction has been 
+* Checks if a spot denoted by a direction has been
 * Takes in the maze struct, x,y coordinates, the direction and an avatar id as parameters.
 * returns true if the avatar has visited it otherwise returns false.
 */
@@ -644,8 +659,8 @@ bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 /**************** delete_maze() ****************/
 /*
 * Deletes the maze preventing memory leaks.
-* 
-* 
+*
+*
 */
 void delete_maze(mazestruct_t *maze){
 
@@ -675,7 +690,7 @@ void delete_maze(mazestruct_t *maze){
 /**************** remove_leader() ****************/
 /*
 * Decrements the number of leaders by 1 only if the avatar was previously a leader
-* 
+*
 */
 void remove_leader(mazestruct_t *maze, int avatar_id){
 	if(maze->leader_array[avatar_id] == avatar_id){
@@ -686,7 +701,7 @@ void remove_leader(mazestruct_t *maze, int avatar_id){
 /**************** insert_last_move() ****************/
 /*
 * updates the last move for an avatar
-* 
+*
 */
 void insert_last_move(mazestruct_t *maze, int direction, int score, int avatar_id){
 
@@ -701,7 +716,7 @@ void insert_last_move(mazestruct_t *maze, int direction, int score, int avatar_i
 /**************** get_last_direction() ****************/
 /*
 * Returns the last direction in which an avatar moved
-* 
+*
 */
 int get_last_direction(mazestruct_t *maze, int avatar_id){
 
@@ -715,8 +730,8 @@ int get_last_direction(mazestruct_t *maze, int avatar_id){
 
 /**************** get_last_score() ****************/
 /*
-* Returns the last score of the last move for an avatar 
-* 
+* Returns the last score of the last move for an avatar
+*
 */
 int get_last_score(mazestruct_t *maze, int avatar_id){
 
@@ -730,8 +745,8 @@ int get_last_score(mazestruct_t *maze, int avatar_id){
 
 /**************** get_number_leaders() ****************/
 /*
-* Returns the number of leaders 
-* 
+* Returns the number of leaders
+*
 */
 int get_number_leaders(mazestruct_t *maze){
 	if(maze != NULL){
@@ -745,7 +760,7 @@ int get_number_leaders(mazestruct_t *maze){
 /**************** set_leader() ****************/
 /*
 * Sets the leader of the given avatar
-* 
+*
 */
 void set_leader(mazestruct_t *maze, int avatar_id, int leader_id){
 	if(maze != NULL){
@@ -760,11 +775,11 @@ void set_leader(mazestruct_t *maze, int avatar_id, int leader_id){
 /**************** get_leader() ****************/
 /*
 * Gets the leader of the given avatar
-* 
+*
 */
 int get_leader(mazestruct_t *maze, int avatar_id){
 	if(maze != NULL){
-			
+
 		return maze->leader_array[avatar_id];
 	}
 	else{
@@ -773,11 +788,38 @@ int get_leader(mazestruct_t *maze, int avatar_id){
 }
 
 
+/**************** cross ****************/
+/*
+* Takes in the height and width of the maze and the number of avatars playing the game.
+* Allocates memory for the maze structure and generates the 2d array of the grid spots.
+* returns a pointer the the new maze structure generated.
+*/
+bool cross_paths (int id1, int id2, mazestruct_t *maze) {
+	bool check_all_crossed = true;
+	int *id1_crossed_with = maze->crossed_with[id1];
+	int *id2_crossed_with = maze->crossed_with[id2];
+
+	if (id1_crossed_with != id2_crossed_with) {
+		for (int i = 0; i < maze->num_avatars; i++) {
+			if (!(id1_crossed_with[i] = id1_crossed_with[i] || id2_crossed_with[i]))
+				check_all_crossed = false;
+		}
+		maze->crossed_with[id2] = maze->crossed_with[id1];
+		for (int i = 0; i < maze->num_avatars; i++) {
+			if (maze->crossed_with[i] == id2_crossed_with) {
+				maze->crossed_with[i] = maze->crossed_with[id1];
+			}
+		}
+	}
+
+	return check_all_crossed;
+}
+
 
 /**************** have_paths_crossed() ****************/
 /*
 * Returns if the paths of the two leaders have crossed
-* 
+*
 */
 bool have_paths_crossed(mazestruct_t *maze){
 	int first, second;
@@ -792,7 +834,7 @@ bool have_paths_crossed(mazestruct_t *maze){
 
 		for (int x = 0; x < maze->width; x++){
 			for (int y = 0; y < maze->height; y++){
-				
+
 				if((maze->map[x][y]->visited_by[first] == 1) && (maze->map[x][y]->visited_by[second] == 1)){
 					return true;
 				}
@@ -803,7 +845,5 @@ bool have_paths_crossed(mazestruct_t *maze){
 	}
 	else{
 		return false;
-	}	
+	}
 }
-
-
