@@ -156,7 +156,6 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
     int adj_avatar;
 
     if (avatar->leader != avatar->fd) {
-	printf("Avatar leader: %d\n", avatar->leader);
 	best_move->direction = get_last_direction(maze, avatar->leader);
 	best_move->score = get_last_score(maze, avatar->leader);
     }
@@ -173,7 +172,6 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	//needs editing!!!!
 	else if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x, 
 		    avatar->pos.y, direction)) != -1) {
-	    printf("Avatar %d is adjacent to me!\n", adj_avatar);
 	    if (avatar->fd < adj_avatar) {
 		direction = M_NULL_MOVE;
 	    }
