@@ -54,8 +54,10 @@ void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
 	//save current position can check later if move was successful
 	XYPos old_pos = avatar->pos;
 	
+	avatar->leader = get_leader(maze, avatar->fd);
+
 	get_best_move(maze, avatar, move);
-	//sleep(1);
+	sleep(1);
 	if (!send_move(avatar->fd, move->direction, comm_sock)) {
 	    fprintf(stderr, "Error writing avatar %d's move to server.\n", 
 		avatar->fd);
@@ -169,8 +171,8 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 
 	best_move->direction = get_last_direction(maze, avatar->leader);
 	best_move->score = get_last_score(maze, avatar->leader);
-	if (check_wall(maze, avatar->pos.x, avatar->pos.y, 
-		    best_move->direction)) {
+	if (check_wall(maze, avatar->pos.x, avatar->pos.y, best_move->direction)
+	       	&& best_move->score != HAVE_TO_BACK_TRACK) {
 	    printf("Switching leaders.\n");
 	    printf("Avatar leader: %d.\n", avatar->leader);
 	    set_leader(maze, avatar->leader, avatar->fd);
