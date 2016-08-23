@@ -692,6 +692,9 @@ int get_last_direction(mazestruct_t *maze, int avatar_id){
 	if(maze->last_move[avatar_id] != NULL){
 		return maze->last_move[avatar_id]->direction;
 	}
+	else{
+		return -1;
+	}
 }
 
 /**************** get_last_score() ****************/
@@ -703,6 +706,9 @@ int get_last_score(mazestruct_t *maze, int avatar_id){
 
 	if(maze->last_move[avatar_id] != NULL){
 		return maze->last_move[avatar_id]->score;
+	}
+	else{
+		return -1;
 	}
 }
 
