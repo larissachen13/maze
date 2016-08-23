@@ -29,10 +29,10 @@ typedef struct spot {
 } spot_t;
 
 // A structure to be used to keep track of the last move of every avatar
-typedef struct move_pair{
+typedef struct avatar_move{
 	int direction;
 	int score;
-} move_pair_t;
+} avatar_move;
 
 /************************* global types *********************/
 
@@ -43,7 +43,7 @@ typedef struct mazestruct{
 	int num_avatars;
 	int move_count;
 	int number_leaders;
-	move_pair_t* last_move[10];
+	avatar_move* last_move[10];
 
 } mazestruct_t;
 
@@ -123,9 +123,9 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 
 	//initialise the array for last moves
 	for (int i = 0; i < 10; i++){
-		move_pair_t *new_move = malloc(sizeof(move_pair_t));
+		avatar_move *new_move = malloc(sizeof(avatar_move));
 		if(new_move == NULL){
-			printf("Error allocaitng memory to a new move_pair struct, exiting..\n");
+			printf("Error allocaitng memory to a new avatar_move struct, exiting..\n");
 			exit(2);
 		}
 		new_move->direction = 8;
