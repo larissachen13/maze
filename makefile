@@ -30,4 +30,7 @@ avatar.o: avatar.h
 clean:
 	rm -f *~
 	rm -f *.o
+	rm -f *.log
+	rm -f core.*
+	rm -f vgcore.*
 	rm -f $(PROG)
