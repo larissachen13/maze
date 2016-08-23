@@ -112,9 +112,17 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	//mark the new space as visited 
 	else if (move->score == FIRST_PRIORITY && move->direction != 
 		M_NULL_MOVE) {
+	    remove_leader(maze, avatar->fd);
 	    avatar->leader = is_someone_adjacent(maze, old_pos.x, 
 		    old_pos.y, move->direction);
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
 		remove_leader(maze, avatar->fd);
+>>>>>>> 6e78902a4e524704c1714cd3a6a3a1e5c5334bf2
+=======
+		remove_leader(maze, avatar->fd);
+>>>>>>> 6e78902a4e524704c1714cd3a6a3a1e5c5334bf2
 	    set_leader(maze, avatar->fd, avatar->leader);
 	    printf("%d\n", avatar->leader);
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
@@ -167,11 +175,21 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
     int adj_avatar;
 
     if (avatar->leader != avatar->fd) {
+
 	best_move->direction = get_last_direction(maze, avatar->leader);
 	best_move->score = get_last_score(maze, avatar->leader);
+	if (check_wall(maze, avatar->pos.x, avatar->pos.y, 
+		    best_move->direction)) {
+	    printf("Switching leaders.\n");
+	    printf("Avatar leader: %d.\n", avatar->leader);
+	    set_leader(maze, avatar->leader, avatar->fd);
+	    avatar->leader = avatar->fd;
+	    printf("Avatar leader: %d.\n", avatar->leader);
+	}
+	else {
+	    return;
+	}
     }
-
-    else {
 
     for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	/************* score the move *****************/
@@ -207,7 +225,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	    best_move->direction = direction;
 	    best_move->score = move_rank;
 	}
-    }}
+    }
 }
 
 /*
