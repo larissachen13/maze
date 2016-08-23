@@ -113,9 +113,8 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 		M_NULL_MOVE) {
 	    avatar->leader = is_someone_adjacent(maze, old_pos.x, 
 		    old_pos.y, move->direction);
-	    set_leader(maze, avatar->fd, avatar->leader);
 	    remove_leader(maze, avatar->fd);
-	    printf("Number of leaders is: %d.", get_number_leaders(maze));
+	    set_leader(maze, avatar->fd, avatar->leader);
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
