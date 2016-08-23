@@ -108,8 +108,8 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	//mark the new space as visited 
 	else if (move->score == FIRST_PRIORITY && move->direction != 
 		M_NULL_MOVE) {
-	    avatar->leader = is_someone_adjacent(maze, avatar->pos.x, 
-		    avatar->pos.y, move->direction);
+	    avatar->leader = is_someone_adjacent(maze, old_pos.x, 
+		    old_pos.y, move->direction);
 	    remove_leader(maze);
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
 	}
@@ -156,6 +156,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
     int adj_avatar;
 
     if (avatar->leader != avatar->fd) {
+	printf("Avatar leader: %d\n", avatar->leader);
 	best_move->direction = get_last_direction(maze, avatar->leader);
 	best_move->score = get_last_score(maze, avatar->leader);
     }

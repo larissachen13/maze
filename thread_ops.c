@@ -127,6 +127,7 @@ static Avatar *initialize_avatar(int id) {
     else {
 	     avatar->fd = id;
 	     avatar->leader = id;
+	     printf("avatar leader: %d\n", avatar->leader);
 	      return avatar;
     }
  }
