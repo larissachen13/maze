@@ -74,6 +74,7 @@ typedef struct Avatar
 {
     int fd;
     XYPos pos;
+    int leader;
 } Avatar;
 
 /* AM Message description */

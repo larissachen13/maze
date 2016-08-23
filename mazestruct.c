@@ -32,7 +32,7 @@ typedef struct spot {
 typedef struct move_pair{
 	int direction;
 	int score;
-} move_pair_t
+} move_pair_t;
 
 /************************* global types *********************/
 
@@ -43,7 +43,7 @@ typedef struct mazestruct{
 	int num_avatars;
 	int move_count;
 	int number_leaders;
-	move_pair* last_move[10];
+	move_pair_t* last_move[10];
 
 } mazestruct_t;
 
@@ -122,8 +122,8 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 	new_maze->number_leaders = num_avatars;
 
 	//initialise the array for last moves
-	(for int i = 0; i < 10; i++){
-		move_pair_t *new_move = malloc(sizeof(new_move_t));
+	for (int i = 0; i < 10; i++){
+		move_pair_t *new_move = malloc(sizeof(move_pair_t));
 		if(new_move == NULL){
 			printf("Error allocaitng memory to a new move_pair struct, exiting..\n");
 			exit(2);
@@ -489,42 +489,42 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 	//west spot
 	if(direction == 0 && x > 0){
 		//loop through and check for each avatar return -1 if none.
-		for(int i = 0; i < maze->num_avatars){
+		for(int i = 0; i < maze->num_avatars; i++){
 			 if (maze->map[x - 1][y]->avatar_number[i] == 1){
 			 	return i;
 			 }
-			 return -1;
 		} 
+		return -1;
 	}
 	//east spot
 	else if(direction == 3 && (x < (maze->width - 1))){
 		
-		for(int i = 0; i < maze->num_avatars){
+		for(int i = 0; i < maze->num_avatars; i++){
 			 if (maze->map[x + 1][y]->avatar_number[i] == 1){
 			 	return i;
 			 }
-			 return -1;
 		} 
+		return -1;
 	}
 	//north spot
 	else if(direction == 1 && (y > 0)){
 
-		for(int i = 0; i < maze->num_avatars){
+		for(int i = 0; i < maze->num_avatars; i++){
 			 if (maze->map[x][y - 1]->avatar_number[i] == 1){
 			 	return i;
 			 }
-			 return -1;
 		} 
+		return -1;
 	}
 	//south spot
 	else if(direction == 2 && (y < maze->height - 1)){
 
-		for(int i = 0; i < maze->num_avatars){
+		for(int i = 0; i < maze->num_avatars; i++){
 			 if (maze->map[x][y + 1]->avatar_number[i] == 1){
 			 	return i;
 			 }
-			 return -1;
 		} 
+		return -1;
 	}
 	else{
 		return -1;

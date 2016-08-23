@@ -104,9 +104,15 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	update_location(maze, old_pos.x, old_pos.y, avatar->pos.x,
 		avatar->pos.y, avatar->fd);
 	//if avatar was forced to backtrack it has reached a dead end
-	if (move->score == HAVE_TO_BACK_TRACK && !is_someone_adjacent(maze, 
-		    avatar->pos.x, avatar->pos.y, 3 - move->direction)) {
+	if (move->score == HAVE_TO_BACK_TRACK && is_someone_adjacent(maze, 
+		    avatar->pos.x, avatar->pos.y, 3 - move->direction == -1)) {
 	    insert_dead_spot(maze, old_pos.x, old_pos.y);
+	}
+	else if (move->score == FIRST_PRIORITY && move->direction != 
+		M_NULL_MOVE) {
+	    avatar->leader = is_someone_adjacent(maze, avatar->pos.x, 
+		    avatar->pos.y, move->direction);
+	    remove_leader(maze);
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
 	else {
@@ -149,6 +155,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 
     best_move->score = -1; //stores score of best move so far
     int move_rank; //keeps score for the current move
+    int adj_avatar;
 
     for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	/************* score the move *****************/
@@ -158,7 +165,11 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	}
 	//if the move results in potentially meeting another avatar
 	//needs editing!!!!
-	else if (is_someone_adjacent(maze, avatar->pos.x, avatar->pos.y, direction)) {
+	else if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x, 
+		    avatar->pos.y, direction)) != -1) {
+	    if (avatar->fd < adj_avatar) {
+		direction = M_NULL_MOVE;
+	    }
 	    move_rank = FIRST_PRIORITY;
 	}
 	//if the move results in potentially visiting an unvisited space

@@ -126,6 +126,7 @@ static Avatar *initialize_avatar(int id) {
     }
     else {
 	     avatar->fd = id;
+	     avatar->leader = id;
 	      return avatar;
     }
  }
