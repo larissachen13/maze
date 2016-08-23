@@ -792,4 +792,3 @@ bool have_paths_crossed(mazestruct_t *maze){
 }
 
 
-
