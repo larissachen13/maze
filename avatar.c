@@ -82,12 +82,14 @@ void wait_for_response(int comm_sock, AM_Message *msg_buff) {
     }
 }
 
+/**************************** local functions ******************************/
 /*
  * Updates the shared map of the maze based on an avatar's last move, former
  * 	position, and current positon
  */
 static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move, 
 	Avatar *avatar) {
+    insert_last_move(maze, move->direction, move->score, avatar->fd);
     //if move failed add a wall to the maze at that spot
     if ((move->direction != M_NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
 	    insert_wall(maze, avatar->pos.x, avatar->pos.y, move->direction);
@@ -102,13 +104,14 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 		    avatar->pos.x, avatar->pos.y, 3 - move->direction == -1)) {
 	    insert_dead_spot(maze, old_pos.x, old_pos.y);
 	}
+	//if avatar is now following a new avatar, update its leader and 
+	//mark the new space as visited 
 	else if (move->score == FIRST_PRIORITY && move->direction != 
 		M_NULL_MOVE) {
 	    avatar->leader = is_someone_adjacent(maze, avatar->pos.x, 
 		    avatar->pos.y, move->direction);
 	    remove_leader(maze);
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
-
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
 	else {
@@ -117,7 +120,6 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
     }
 }
 
-/**************************** local functions ******************************/
 /*
  * Determines an avatar's next move using the shared maze knowledge of all the
  * 	avatars and the avatar's current position
@@ -152,6 +154,13 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
     best_move->score = -1; //stores score of best move so far
     int move_rank; //keeps score for the current move
     int adj_avatar;
+
+    if (avatar->leader != avatar->fd) {
+	best_move->direction = get_last_direction(maze, avatar->leader);
+	best_move->score = get_last_score(maze, avatar->leader);
+    }
+
+    else {
 
     for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	/************* score the move *****************/
@@ -188,7 +197,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	    best_move->direction = direction;
 	    best_move->score = move_rank;
 	}
-    }
+    }}
 }
 
 /*
