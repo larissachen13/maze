@@ -671,11 +671,13 @@ void delete_maze(mazestruct_t *maze){
 
 /**************** remove_leader() ****************/
 /*
-* Decrements the number of leaders by 1
+* Decrements the number of leaders by 1 only if the avatar was previously a leader
 * 
 */
-void remove_leader(mazestruct_t *maze){
-	maze->number_leaders--;
+void remove_leader(mazestruct_t *maze, int avatar_id){
+	if(maze->leader_array[avatar_id] == avatar_id){
+		maze->number_leaders--;
+	}
 }
 
 /**************** insert_last_move() ****************/
