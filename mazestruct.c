@@ -44,6 +44,7 @@ typedef struct mazestruct{
 	int move_count;
 	int number_leaders;
 	avatar_move* last_move[10];
+	int leader_array[10];
 
 } mazestruct_t;
 
@@ -130,7 +131,10 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 		}
 		new_move->direction = 8;
 		new_move->score = -1;
+		//initialise last_move
 		new_maze->last_move[i] = new_move;
+		//initialise leader array
+		new_maze->leader_array[i] = i;
 	}
 	return new_maze;
 }
@@ -716,6 +720,65 @@ int get_last_score(mazestruct_t *maze, int avatar_id){
 	else{
 		return -1;
 	}
+}
+
+/**************** get_number_leaders() ****************/
+/*
+* Returns the number of leaders 
+* 
+*/
+int get_number_leaders(mazestruct_t *maze){
+	if(maze != NULL){
+		return maze->number_leaders;
+	}
+	else{
+		return NULL;
+	}
+}
+
+/**************** set_leader() ****************/
+/*
+* Sets the leader of the given avatar
+* 
+*/
+void set_leader(mazestruct_t *maze, int avatar_id, int leader_id){
+	if(maze != NULL){
+		maze->leader_array[avatar_id] = leader_id;
+	}
+}
+
+
+
+/**************** have_paths_crossed() ****************/
+/*
+* Returns if the paths of the two leaders have crossed
+* 
+*/
+bool have_paths_crossed(mazestruct_t *maze){
+	int first, second;
+	if(maze != NULL){
+		first = maze->leader_array[0];
+
+		for(int i = 1; i < 10; i++){
+			if(maze->leader_array[i] != first){
+				second = maze->leader_array[i];
+			}
+		}
+
+		for (int x = 0; x < maze->width; x++){
+			for (int y = 0; y < maze->height; y++){
+
+				if((maze->map[x][y]->visited_by[first] == 1) && (maze->map[x][y]->visited_by[second] == 1)){
+					return true;
+				}
+
+			}
+		}
+		return false;
+	}
+	else{
+		return false;
+	}	
 }
 
 

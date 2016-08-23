@@ -148,6 +148,27 @@ int get_last_direction(mazestruct_t *maze, int avatar_id);
 */
 int get_last_score(mazestruct_t *maze, int avatar_id);
 
+/**************** get_number_leaders() ****************/
+/*
+* Returns the number of leaders 
+* 
+*/
+int get_number_leaders(mazestruct_t *maze);
+
+/**************** set_leader() ****************/
+/*
+* Sets the leader of the given avatar
+* 
+*/
+void set_leader(mazestruct_t *maze, int avatar_id, int leader_id);
+
+/**************** have_paths_crossed() ****************/
+/*
+* Returns if the paths of the two leaders have crossed
+* 
+*/
+bool have_paths_crossed(mazestruct_t *maze);
+
 #endif
 
 
