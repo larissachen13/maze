@@ -12,6 +12,7 @@
 /************************* global variables ******************/
 
 /************************* local types **********************/
+//A struct for each grid spot in the maze
 typedef struct spot {
 	//bools for the walls
 	bool north;
@@ -27,6 +28,12 @@ typedef struct spot {
 	int visited_by[10];
 } spot_t;
 
+// A structure to be used to keep track of the last move of every avatar
+typedef struct move_pair{
+	int direction;
+	int score;
+} move_pair_t
+
 /************************* global types *********************/
 
 typedef struct mazestruct{
@@ -36,6 +43,7 @@ typedef struct mazestruct{
 	int num_avatars;
 	int move_count;
 	int number_leaders;
+	move_pair* last_move[10];
 
 } mazestruct_t;
 
@@ -113,6 +121,17 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 	new_maze->move_count = 0;
 	new_maze->number_leaders = num_avatars;
 
+	//initialise the array for last moves
+	(for int i = 0; i < 10; i++){
+		move_pair_t *new_move = malloc(sizeof(new_move_t));
+		if(new_move == NULL){
+			printf("Error allocaitng memory to a new move_pair struct, exiting..\n");
+			exit(2);
+		}
+		new_move->direction = 8;
+		new_move->score = -1;
+		new_maze->last_move[i] = new_move;
+	}
 	return new_maze;
 }
 
