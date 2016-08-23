@@ -114,6 +114,7 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	    avatar->leader = is_someone_adjacent(maze, old_pos.x, 
 		    old_pos.y, move->direction);
 	    set_leader(maze, avatar->fd, avatar->leader);
+	    printf("Number of leaders is: %d.", get_number_leaders(maze));
 	    remove_leader(maze);
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
 	}
@@ -136,7 +137,7 @@ static void get_best_move(mazestruct_t *maze, Avatar *avatar,
 	come_together(maze, avatar, best_move);
     }
     //if you recognize that all avatar's have a common path
-    else if (get_number_leaders(maze) <= 2 && have_paths_crossed(maze)) {
+    else if ((get_number_leaders(maze) <= 2) && have_paths_crossed(maze)) {
 	avatars_unite = true;
 	come_together(maze, avatar, best_move);
     }

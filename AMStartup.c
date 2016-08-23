@@ -26,7 +26,7 @@ int recv_init_response(int comm_sock, AM_Message *init_response);
 /******************** global variables **********************/
 mazestruct_t *maze;
 pthread_mutex_t my_turn;
-bool avatars_unite;
+bool avatars_unite = false;
 
 /*
  *  Main
