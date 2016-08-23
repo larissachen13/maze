@@ -667,8 +667,44 @@ void remove_leader(mazestruct_t *maze){
 	maze->number_leaders--;
 }
 
+/**************** insert_last_move() ****************/
+/*
+* updates the last move for an avatar
+* 
+*/
+void insert_last_move(mazestruct_t *maze, int direction, int score, int avatar_id){
 
+	//check if a last move exists for that avatar then set
+	if(maze->last_move[avatar_id] != NULL){
+		maze->last_move[avatar_id]->score = score;
+		maze->last_move[avatar_id]->direction = direction;
+	}
 
+}
+
+/**************** get_last_direction() ****************/
+/*
+* Returns the last direction in which an avatar moved
+* 
+*/
+int get_last_direction(mazestruct_t *maze, int avatar_id){
+
+	if(maze->last_move[avatar_id] != NULL){
+		return maze->last_move[avatar_id]->direction;
+	}
+}
+
+/**************** get_last_score() ****************/
+/*
+* Returns the last score of the last move for an avatar 
+* 
+*/
+int get_last_score(mazestruct_t *maze, int avatar_id){
+
+	if(maze->last_move[avatar_id] != NULL){
+		return maze->last_move[avatar_id]->score;
+	}
+}
 
 
 

@@ -233,3 +233,4 @@ static bool same_pos(XYPos old_pos, XYPos new_pos) {
 static void come_together(avatar_move *move) {
     printf("Coming together!!!\n");
 }
+
