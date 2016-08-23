@@ -35,6 +35,7 @@ typedef struct mazestruct{
 	int width;
 	int num_avatars;
 	int move_count;
+	int number_leaders;
 
 } mazestruct_t;
 
@@ -110,6 +111,7 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 	new_maze->width = width;
 	new_maze->num_avatars = num_avatars;
 	new_maze->move_count = 0;
+	new_maze->number_leaders = num_avatars;
 
 	return new_maze;
 }
@@ -455,35 +457,59 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 /*
 * Checks if there is someone the adjacent spot dictated by the inputted direction.
 * Takes in the maze struct, x,y coordinates and the direction as parameters.
-* returns true if someone is adjacent and false otherwise.
+* returns the lowest avatar id if someone is adjacent and -1 if noone is found.
 */
-bool is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
+int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 
 	//check coords
 	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
 		printf("Coordinates are out of range\n");
 		return -1;
 	}
-	//check the west
-	if((x > 0) && (direction == 0)){
-		return maze->map[x - 1][y]->avatar;
+
+	//west spot
+	if(direction == 0 && x > 0){
+		//loop through and check for each avatar return -1 if none.
+		for(int i = 0; i < maze->num_avatars){
+			 if (maze->map[x - 1][y]->avatar_number[i] == 1){
+			 	return i;
+			 }
+			 return -1;
+		} 
 	}
-	//check the north
-	if((y > 0) && (direction == 1)){
-		return (maze->map[x][y - 1]->avatar);
+	//east spot
+	else if(direction == 3 && (x < (maze->width - 1))){
+		
+		for(int i = 0; i < maze->num_avatars){
+			 if (maze->map[x + 1][y]->avatar_number[i] == 1){
+			 	return i;
+			 }
+			 return -1;
+		} 
 	}
-	//check the south
-	if((y < (maze->height -1)) && (direction == 2)){
-		return maze->map[x][y + 1]->avatar;
+	//north spot
+	else if(direction == 1 && (y > 0)){
+
+		for(int i = 0; i < maze->num_avatars){
+			 if (maze->map[x][y - 1]->avatar_number[i] == 1){
+			 	return i;
+			 }
+			 return -1;
+		} 
 	}
-	//check the east
-	if((x < (maze->width - 1)) && (direction == 3)){
-		if(maze->map[x + 1][y]->avatar){
-			return 3;
-		}
+	//south spot
+	else if(direction == 2 && (y < maze->height - 1)){
+
+		for(int i = 0; i < maze->num_avatars){
+			 if (maze->map[x][y + 1]->avatar_number[i] == 1){
+			 	return i;
+			 }
+			 return -1;
+		} 
 	}
-	//if we make it down to here
-	return false;
+	else{
+		return -1;
+	}
 }
 
 
@@ -599,6 +625,7 @@ void delete_maze(mazestruct_t *maze){
 	if(maze != NULL){
 		//print the total number of moves
 		printf("TOTAL NUMBER OF MOVES: %d\n", maze->move_count);
+		printf("Number of leaders: %d\n", maze->number_leaders);
 
 		//go through each spot and free the memory associated with it
 		for (int i = 0; i < maze->width; i++){
@@ -612,7 +639,14 @@ void delete_maze(mazestruct_t *maze){
 	}
 }
 
-
+/**************** remove_leader() ****************/
+/*
+* Decrements the number of leaders by 1
+* 
+*/
+void remove_leader(mazestruct_t *maze){
+	maze->number_leaders--;
+}
 
 
 

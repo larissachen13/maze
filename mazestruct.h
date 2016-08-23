@@ -115,6 +115,13 @@ bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_num
 */
 void delete_maze(mazestruct_t *maze);
 
+/**************** remove_leader() ****************/
+/*
+* Decrements the number of leaders by 1
+* 
+*/
+void remove_leader(mazestruct_t *maze);
+
 #endif
 
 
