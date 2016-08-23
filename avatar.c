@@ -112,19 +112,10 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	//mark the new space as visited 
 	else if (move->score == FIRST_PRIORITY && move->direction != 
 		M_NULL_MOVE) {
-	    remove_leader(maze, avatar->fd);
 	    avatar->leader = is_someone_adjacent(maze, old_pos.x, 
 		    old_pos.y, move->direction);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-		remove_leader(maze, avatar->fd);
->>>>>>> 6e78902a4e524704c1714cd3a6a3a1e5c5334bf2
-=======
-		remove_leader(maze, avatar->fd);
->>>>>>> 6e78902a4e524704c1714cd3a6a3a1e5c5334bf2
+	    remove_leader(maze, avatar->fd);
 	    set_leader(maze, avatar->fd, avatar->leader);
-	    printf("%d\n", avatar->leader);
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
