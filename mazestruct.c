@@ -749,7 +749,11 @@ int get_number_leaders(mazestruct_t *maze){
 */
 void set_leader(mazestruct_t *maze, int avatar_id, int leader_id){
 	if(maze != NULL){
-		maze->leader_array[avatar_id] = leader_id;
+		for(int i = 0; i < maze->num_avatars; i++){
+			if(maze->leader_array[i] == avatar_id){
+				maze->leader_array[i] = leader_id;
+			}
+		}
 	}
 }
 
@@ -765,7 +769,7 @@ bool have_paths_crossed(mazestruct_t *maze){
 	if(maze != NULL){
 		first = maze->leader_array[0];
 
-		for(int i = 1; i < 10; i++){
+		for(int i = 1; i < maze->num_avatars; i++){
 			if(maze->leader_array[i] != first){
 				second = maze->leader_array[i];
 			}
@@ -773,7 +777,7 @@ bool have_paths_crossed(mazestruct_t *maze){
 
 		for (int x = 0; x < maze->width; x++){
 			for (int y = 0; y < maze->height; y++){
-
+				
 				if((maze->map[x][y]->visited_by[first] == 1) && (maze->map[x][y]->visited_by[second] == 1)){
 					return true;
 				}

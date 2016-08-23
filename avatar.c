@@ -55,7 +55,7 @@ void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
 	XYPos old_pos = avatar->pos;
 	
 	get_best_move(maze, avatar, move);
-	sleep(1);
+	//sleep(1);
 	if (!send_move(avatar->fd, move->direction, comm_sock)) {
 	    fprintf(stderr, "Error writing avatar %d's move to server.\n", 
 		avatar->fd);
@@ -114,8 +114,9 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 		M_NULL_MOVE) {
 	    avatar->leader = is_someone_adjacent(maze, old_pos.x, 
 		    old_pos.y, move->direction);
-	    remove_leader(maze, avatar->fd);
+		remove_leader(maze, avatar->fd);
 	    set_leader(maze, avatar->fd, avatar->leader);
+	    printf("%d\n", avatar->leader);
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
