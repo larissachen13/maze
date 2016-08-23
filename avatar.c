@@ -22,6 +22,9 @@
 #include <unistd.h>
 #include "avatar.h"
 
+/******************** global variables **********************/
+extern bool avatars_unite;
+
 /*********************** local function prototypes ************************/
 static void get_best_move(mazestruct_t *maze, Avatar *avatar, 
 	avatar_move *best_move);
@@ -31,7 +34,7 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos,
 	avatar_move *move, Avatar *avatar);
 static bool send_move(uint32_t avatar_id, uint32_t direction, int comm_sock);
 static bool same_pos(XYPos old_pos, XYPos new_pos);
-static void come_together(avatar_move *move);
+static void come_together(mazestruct_t * maze, Avatar *avatar, avatar_move *best_move);
 
 /**************************** global functions *****************************/
 /*
@@ -110,6 +113,7 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 		M_NULL_MOVE) {
 	    avatar->leader = is_someone_adjacent(maze, old_pos.x, 
 		    old_pos.y, move->direction);
+	    set_leader(maze, avatar->fd, avatar->leader);
 	    remove_leader(maze);
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
 	}
@@ -127,9 +131,14 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 static void get_best_move(mazestruct_t *maze, Avatar *avatar, 
 	avatar_move *best_move) {
 
-    //haven't figured out what to do here so just avoid situation
-    if (false) {
-	come_together(best_move);
+    //if there is a common path already identified, unite
+    if (avatars_unite) {
+	come_together(maze, avatar, best_move);
+    }
+    //if you recognize that all avatar's have a common path
+    else if (get_number_leaders(maze) <= 2 && have_paths_crossed(maze)) {
+	avatars_unite = true;
+	come_together(maze, avatar, best_move);
     }
     else {
 	get_best_move_helper(maze, avatar, best_move);
@@ -229,7 +238,53 @@ static bool same_pos(XYPos old_pos, XYPos new_pos) {
  * Test method that will eventually be replaced with actual method to bring
  * 	avatars together
  */
-static void come_together(avatar_move *move) {
+static void come_together(mazestruct_t *maze, Avatar *avatar, avatar_move *best_move) {
     printf("Coming together!!!\n");
+    best_move->score = -1; //stores score of best move so far
+    int move_rank; //keeps score for the current move
+    int adj_avatar;
+
+    if (avatar->leader != avatar->fd) {
+	best_move->direction = get_last_direction(maze, avatar->leader);
+	best_move->score = get_last_score(maze, avatar->leader);
+    }
+
+    else {
+
+    for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
+	/************* score the move *****************/
+	//if the move results in running into a wall
+	if (check_wall(maze, avatar->pos.x, avatar->pos.y, direction)) {
+	    move_rank = DONT_DO_IT;
+	}
+	//if the move results in potentially meeting another avatar
+	else if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x, 
+		    avatar->pos.y, direction)) != -1) {
+	    if (avatar->fd < adj_avatar) {
+		direction = M_NULL_MOVE;
+	    }
+	    move_rank = FIRST_PRIORITY;
+	}
+	//if the move results in potentially visiting an unvisited space
+	else if (!is_visited(maze, avatar->pos.x, avatar->pos.y, direction)) {
+	    move_rank = DONT_DO_IT;
+	}
+	//if the move results in potentially visiting a space visited by
+	//a different avatar
+	else if(!did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction, 
+		    avatar->fd)) {
+	    move_rank = FIRST_PRIORITY;
+	}
+	//if the move results in visiting a space I have already visited
+	else {
+	    move_rank = HAVE_TO_BACK_TRACK;
+	}
+	//check how current move compares to the best_move
+	if (move_rank > best_move->score) {
+	    best_move->direction = direction;
+	    best_move->score = move_rank;
+	}
+    }}
+    
 }
 

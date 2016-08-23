@@ -40,34 +40,8 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
  	AM_Message *msg_buff);
 
 /******************** external global declarations ****************/
-//not sure if this is a good idea but doing it anyway
 extern mazestruct_t *maze;
 extern pthread_mutex_t my_turn;
-
-/**************** generate_avatars ****************/
-/*
-int generate_avatars(int num_avatars, int maze_port, char *host_name) {
-  void *thread_status;
-  pthread_t avatars[AM_MAX_AVATAR];
-
-    // generate params to pass into each thread
-    thread_data_t params;
-    params.maze_port = maze_port;
-    params.host_name = host_name;
-
-    for (int i = 0; i < num_avatars; i++) {
-	     params.id = i;
-	      pthread_create(&avatars[i], NULL, avatar_thread, &params);
-	      if (avatars[i] != 0) {
-	         return AVATAR_NOT_CREATED;
-	      }
-    }
-    for (int i = 0; i < num_avatars; i++) {
-	     pthread_join(avatars[i], &thread_status);
-    }
-    return SUCCESS;
-}
-*/
 
 /**************** avatar_thread ****************/
 void *avatar_thread(void *params) {
