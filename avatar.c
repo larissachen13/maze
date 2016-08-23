@@ -22,12 +22,6 @@
 #include <unistd.h>
 #include "avatar.h"
 
-/***************************** local struct ********************************/
-typedef struct avatar_move {
-    int direction;
-    int score;
-} avatar_move;
-
 /*********************** local function prototypes ************************/
 static void get_best_move(mazestruct_t *maze, Avatar *avatar, 
 	avatar_move *best_move);
@@ -230,3 +224,4 @@ static bool same_pos(XYPos old_pos, XYPos new_pos) {
 static void come_together(avatar_move *move) {
     printf("Coming together!!!\n");
 }
+

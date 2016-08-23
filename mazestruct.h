@@ -15,6 +15,11 @@
 /**************** global types ****************/
 typedef struct mazestruct mazestruct_t;  // opaque to users of the module
 
+typedef struct avatar_move {
+    int direction;
+    int score;
+} avatar_move;
+
 /**************** functions ****************/
 
 /**************** maze_new() ****************/
