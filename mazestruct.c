@@ -221,7 +221,7 @@ void maze_print(mazestruct_t *maze){
 	else{
 
 		for (int i = 0; i < maze->width; i ++){
-			printf(" %-2d", i);
+			printf("%-2d", i);
 		}
 		printf("\n");
 
@@ -285,6 +285,7 @@ void maze_print(mazestruct_t *maze){
 		}
 		printf("\n");
 	}
+	printf("Number of leaders: %d\n", maze->number_leaders);
 }
 
 /**************** place_avatar() ****************/
