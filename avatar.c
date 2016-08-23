@@ -136,7 +136,7 @@ static void get_best_move(mazestruct_t *maze, Avatar *avatar,
 	come_together(maze, avatar, best_move);
     }
     //if you recognize that all avatar's have a common path
-    else if ((get_number_leaders(maze) <= 2) && have_paths_crossed(maze)) {
+    else if ((get_number_leaders(maze) == 2) && have_paths_crossed(maze)) {
 	avatars_unite = true;
 	come_together(maze, avatar, best_move);
     }
