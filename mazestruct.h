@@ -81,7 +81,7 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction);
 * Takes in the maze struct, x,y coordinates and the direction as parameters.
 * returns true if someone is adjacent and false otherwise.
 */
-bool is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction);
+int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction);
 
 /**************** update_location() ****************/
 /*

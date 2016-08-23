@@ -113,6 +113,8 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	    avatar->leader = is_someone_adjacent(maze, avatar->pos.x, 
 		    avatar->pos.y, move->direction);
 	    remove_leader(maze);
+	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
+
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
 	else {
@@ -167,6 +169,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	//needs editing!!!!
 	else if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x, 
 		    avatar->pos.y, direction)) != -1) {
+	    printf("Avatar %d is adjacent to me!\n", adj_avatar);
 	    if (avatar->fd < adj_avatar) {
 		direction = M_NULL_MOVE;
 	    }
