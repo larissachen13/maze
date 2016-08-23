@@ -191,7 +191,7 @@ void maze_print(mazestruct_t *maze){
 				else if(maze->map[j][i]->dead){
 					printf(" D ");
 				}
-				else if(maze->map[i][j]->visited){
+				else if(maze->map[j][i]->visited){
 					printf(" V ");
 				}
 				else{
