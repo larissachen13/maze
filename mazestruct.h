@@ -162,6 +162,14 @@ int get_number_leaders(mazestruct_t *maze);
 */
 void set_leader(mazestruct_t *maze, int avatar_id, int leader_id);
 
+/**************** get_leader() ****************/
+/*
+* Gets the leader of the given avatar
+* 
+*/
+int get_leader(mazestruct_t *maze, int avatar_id);
+
+
 /**************** have_paths_crossed() ****************/
 /*
 * Returns if the paths of the two leaders have crossed

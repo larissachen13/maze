@@ -757,6 +757,21 @@ void set_leader(mazestruct_t *maze, int avatar_id, int leader_id){
 	}
 }
 
+/**************** get_leader() ****************/
+/*
+* Gets the leader of the given avatar
+* 
+*/
+int get_leader(mazestruct_t *maze, int avatar_id){
+	if(maze != NULL){
+			
+		return maze->leader_array[avatar_id];
+	}
+	else{
+		return -1;
+	}
+}
+
 
 
 /**************** have_paths_crossed() ****************/
