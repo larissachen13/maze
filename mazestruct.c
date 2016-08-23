@@ -718,5 +718,19 @@ int get_last_score(mazestruct_t *maze, int avatar_id){
 	}
 }
 
+/**************** get_number_leaders() ****************/
+/*
+* Returns the number of leaders 
+* 
+*/
+int get_number_leaders(mazestruct_t *maze){
+	if(maze != NULL){
+		return maze->number_leaders;
+	}
+	else{
+		return NULL;
+	}
+}
+
 
 
