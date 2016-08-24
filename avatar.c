@@ -8,6 +8,7 @@
  */
 
 /************* constants ***************/
+#define FOLLOW_THE_LEADER (5)
 #define FIRST_PRIORITY (4)
 #define SECOND_PRIORITY	(3)
 #define THIRD_PRIORITY (2)
@@ -54,10 +55,10 @@ void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
 	//save current position can check later if move was successful
 	XYPos old_pos = avatar->pos;
 	
-	avatar->leader = get_leader(maze, avatar->fd);
+	//avatar->leader = get_leader(maze, avatar->fd);
 
 	get_best_move(maze, avatar, move);
-	sleep(1);
+	//sleep(1);
 	if (!send_move(avatar->fd, move->direction, comm_sock)) {
 	    fprintf(stderr, "Error writing avatar %d's move to server.\n", 
 		avatar->fd);
@@ -94,7 +95,7 @@ void wait_for_response(int comm_sock, AM_Message *msg_buff) {
  * 	position, and current positon
  */
 static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move, 
-	Avatar *avatar) {
+	Avatar *avatar){
     insert_last_move(maze, move->direction, move->score, avatar->fd);
     //if move failed add a wall to the maze at that spot
     if ((move->direction != M_NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
@@ -106,18 +107,31 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	update_location(maze, old_pos.x, old_pos.y, avatar->pos.x,
 		avatar->pos.y, avatar->fd);
 	//if avatar was forced to backtrack it has reached a dead end
-	if (move->score == HAVE_TO_BACK_TRACK && is_someone_adjacent(maze, 
-		    avatar->pos.x, avatar->pos.y, 3 - move->direction == -1)) {
+	if (move->score == HAVE_TO_BACK_TRACK && (is_someone_adjacent(maze, 
+		    avatar->pos.x, avatar->pos.y, 3 - move->direction) == -1)) {
 	    insert_dead_spot(maze, old_pos.x, old_pos.y);
 	}
 	//if avatar is now following a new avatar, update its leader and 
 	//mark the new space as visited 
-	else if (move->score == FIRST_PRIORITY && move->direction != 
+	//needs to be updated
+	else if (move->score == FOLLOW_THE_LEADER && move->direction != 
 		M_NULL_MOVE) {
 	    avatar->leader = is_someone_adjacent(maze, old_pos.x, 
 		    old_pos.y, move->direction);
 	    remove_leader(maze, avatar->fd);
 	    set_leader(maze, avatar->fd, avatar->leader);
+	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
+	    cross_paths(avatar->fd, avatar->leader, maze);
+	}
+	else if (move->score == FIRST_PRIORITY) {
+	    int adj_path = who_visited(maze, old_pos.x, old_pos.y, 
+		    move->direction, avatar->fd);
+	    if (adj_path != -1) {
+		if (cross_paths(avatar->fd, adj_path, maze)) {
+		    printf("we crossed all paths.\n");
+		    avatars_unite = true;
+		}
+	    }
 	    visited_spot(maze, avatar->pos.x, avatar->pos.y, avatar->fd);
 	}
 	//otherwise space hasn't been visited by avatar so update visited list
@@ -139,10 +153,10 @@ static void get_best_move(mazestruct_t *maze, Avatar *avatar,
 	come_together(maze, avatar, best_move);
     }
     //if you recognize that all avatar's have a common path
-    else if ((get_number_leaders(maze) == 2) && have_paths_crossed(maze)) {
-	avatars_unite = true;
-	come_together(maze, avatar, best_move);
-    }
+    //else if ((cross_paths(avatar->fd, , maze))) {
+//	avatars_unite = true;
+//	come_together(maze, avatar, best_move);
+  //  }
     else {
 	get_best_move_helper(maze, avatar, best_move);
     }
@@ -165,12 +179,17 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 
     best_move->score = -1; //stores score of best move so far
     int move_rank; //keeps score for the current move
+    int adj_path;
     int adj_avatar;
 
+    
     if (avatar->leader != avatar->fd) {
 
 	best_move->direction = get_last_direction(maze, avatar->leader);
 	best_move->score = get_last_score(maze, avatar->leader);
+	return;
+    }
+	/*
 	if (check_wall(maze, avatar->pos.x, avatar->pos.y, best_move->direction)
 	       	&& best_move->score != HAVE_TO_BACK_TRACK) {
 	    printf("Switching leaders.\n");
@@ -183,6 +202,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	    return;
 	}
     }
+    */
 
     for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	/************* score the move *****************/
@@ -197,6 +217,11 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	    if (avatar->fd < adj_avatar) {
 		direction = M_NULL_MOVE;
 	    }
+	    move_rank = FOLLOW_THE_LEADER;
+	}
+	else if ((adj_path = who_visited(maze, avatar->pos.x, avatar->pos.y, 
+		    direction, avatar->fd)) != -1) {
+	    //printf("path next to %d: %d\n", avatar->fd, adj_path);
 	    move_rank = FIRST_PRIORITY;
 	}
 	//if the move results in potentially visiting an unvisited space
@@ -276,7 +301,7 @@ static void come_together(mazestruct_t *maze, Avatar *avatar, avatar_move *best_
 	    if (avatar->fd < adj_avatar) {
 		direction = M_NULL_MOVE;
 	    }
-	    move_rank = FIRST_PRIORITY;
+	    move_rank = FOLLOW_THE_LEADER;
 	}
 	//if the move results in potentially visiting an unvisited space
 	else if (!is_visited(maze, avatar->pos.x, avatar->pos.y, direction)) {

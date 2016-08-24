@@ -177,6 +177,8 @@ int get_leader(mazestruct_t *maze, int avatar_id);
 */
 bool have_paths_crossed(mazestruct_t *maze);
 
+int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id);
+bool cross_paths (int id1, int id2, mazestruct_t *maze);
 #endif
 
 

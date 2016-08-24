@@ -660,7 +660,7 @@ int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id) 
 	int *my_crossed_with = maze->crossed_with[avatar_id];
 	for (int i = 0; i < maze->num_avatars; i++) {
 		if (my_crossed_with[i] == 0) {
-			if(did_x_visit(maze, x, y, direction, avatar_id)) {
+			if(did_x_visit(maze, x, y, direction, i)) {
 				return i;
 			}
 		}
@@ -695,6 +695,7 @@ void delete_maze(mazestruct_t *maze){
 				free(maze->last_move[m]);
 			}
 		}
+		
 		free(maze);
 	}
 }
@@ -813,8 +814,9 @@ bool cross_paths (int id1, int id2, mazestruct_t *maze) {
 
 	if (id1_crossed_with != id2_crossed_with) {
 		for (int i = 0; i < maze->num_avatars; i++) {
-			if (!(id1_crossed_with[i] = id1_crossed_with[i] || id2_crossed_with[i]))
+			if (!(id1_crossed_with[i] = id1_crossed_with[i] || id2_crossed_with[i])) {
 				check_all_crossed = false;
+			}
 		}
 		maze->crossed_with[id2] = maze->crossed_with[id1];
 		for (int i = 0; i < maze->num_avatars; i++) {
@@ -822,6 +824,7 @@ bool cross_paths (int id1, int id2, mazestruct_t *maze) {
 				maze->crossed_with[i] = maze->crossed_with[id1];
 			}
 		}
+		free(id2_crossed_with);
 	}
 
 	return check_all_crossed;
