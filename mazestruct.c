@@ -357,7 +357,6 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted west wall at %d,%d.\n", x, y);
-			maze->move_count++;
 		}
 	}
 	if(direction == 1){
@@ -368,7 +367,6 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted north wall at %d,%d.\n", x, y);
-			maze->move_count++;
 		}
 	}
 	if(direction == 2){
@@ -379,7 +377,6 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted south wall at %d,%d.\n", x, y);
-			maze->move_count++;
 		}
 	}
 	if(direction == 3){
@@ -390,7 +387,6 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted east wall at %d,%d.\n", x, y);
-			maze->move_count++;
 		}
 	}
 
@@ -595,7 +591,6 @@ void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int 
 
 	printf("\n********************************************************************************\n");
 	printf("Moved avatar %d from %d,%d to %d,%d.\n", avatar_id, init_x, init_y, new_x, new_y);
-	maze->move_count++;
 	maze_print(maze);
 	printf("********************************************************************************\n");
 }
@@ -677,6 +672,8 @@ int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id) 
 void delete_maze(mazestruct_t *maze){
 
 	if(maze != NULL){
+	    	//add one for the last move  
+		maze->move_count++;
 		//print the total number of moves
 		printf("TOTAL NUMBER OF MOVES: %d\n", maze->move_count);
 		printf("Number of leaders: %d\n", maze->number_leaders);
@@ -722,6 +719,7 @@ void insert_last_move(mazestruct_t *maze, int direction, int score, int avatar_i
 	if(maze->last_move[avatar_id] != NULL){
 		maze->last_move[avatar_id]->score = score;
 		maze->last_move[avatar_id]->direction = direction;
+		maze->move_count++; //increment the move count
 	}
 
 }
