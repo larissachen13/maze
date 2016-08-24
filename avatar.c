@@ -249,7 +249,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	//update the maze and your move so that they reflect only the valid one
 	get_true_backtrack_route(maze, avatar, best_move);
     }
-    //check if the move is 
+    //check if the move should be considered a backtrack 
     else if (should_be_backtrack(maze, avatar, best_move->direction)) {
 	best_move->score = HAVE_TO_BACK_TRACK;
     }
