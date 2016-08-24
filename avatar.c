@@ -295,6 +295,10 @@ static void come_together(mazestruct_t *maze, Avatar *avatar, avatar_move *best_
 	if (check_wall(maze, avatar->pos.x, avatar->pos.y, direction)) {
 	    move_rank = DONT_DO_IT;
 	}
+	//if the move results in potentially visiting an unvisited space
+	else if (!is_visited(maze, avatar->pos.x, avatar->pos.y, direction)) {
+	    move_rank = DONT_DO_IT;
+	}
 	//if the move results in potentially meeting another avatar
 	else if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x, 
 		    avatar->pos.y, direction)) != -1) {
@@ -302,10 +306,6 @@ static void come_together(mazestruct_t *maze, Avatar *avatar, avatar_move *best_
 		direction = M_NULL_MOVE;
 	    }
 	    move_rank = FOLLOW_THE_LEADER;
-	}
-	//if the move results in potentially visiting an unvisited space
-	else if (!is_visited(maze, avatar->pos.x, avatar->pos.y, direction)) {
-	    move_rank = DONT_DO_IT;
 	}
 	//if the move results in potentially visiting a space visited by
 	//a different avatar
