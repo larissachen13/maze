@@ -656,6 +656,18 @@ bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 	return false;
 }
 
+int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id) {
+	int *my_crossed_with = maze->crossed_with[avatar_id];
+	for (int i = 0; i < maze->num_avatars; i++) {
+		if (my_crossed_with[i] == 0) {
+			if(did_x_visit(maze, x, y, direction, avatar_id)) {
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
 /**************** delete_maze() ****************/
 /*
 * Deletes the maze preventing memory leaks.
