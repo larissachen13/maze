@@ -88,6 +88,17 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction);
 */
 int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction);
 
+/**************** is_someone_here() ****************/
+/*
+* Checks if there is an avatar other than the one with the given id at the 
+* 	current spot dictated by x and y.
+* Takes in the maze struct, x,y coordinates and the id of the avatar checking
+* 	if another avatar is present.
+* Returns the lowest avatar id if another avatar is on the spot 
+* 	and -1 if none is found.
+*/
+int is_someone_here(mazestruct_t *maze, int x, int y, int id);
+
 /**************** update_location() ****************/
 /*
 * Moves an avatar from one spot to another one.

@@ -550,6 +550,30 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 	}
 }
 
+/**************** is_someone_here() ****************/
+/*
+* Checks if there is an avatar other than the one with the given id at the 
+* 	current spot dictated by x and y.
+* Takes in the maze struct, x,y coordinates and the id of the avatar checking
+* 	if another avatar is present.
+* Returns the lowest avatar id if another avatar is on the spot 
+* 	and -1 if none is found.
+*/
+int is_someone_here(mazestruct_t *maze, int x, int y, int id){
+	//check coords
+	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
+		printf("Coordinates are out of range\n");
+		return -1;
+	}
+	else {
+	    for(int i = 0; i < maze->num_avatars; i++){
+		if (i != id && maze->map[x][y]->avatar_number[i] == 1){
+		    return i;
+		}
+	    }
+	    return -1;
+	}
+}
 
 /**************** update_location() ****************/
 /*
