@@ -418,9 +418,47 @@ void visited_spot(mazestruct_t *maze, int x, int y, int avatar_number){
 	}
 }
 
+/****************** is_dead() ***********************/
+/*
+ * returns whether or not the spot in the a given direction from
+ * 	the spot at (x,y) is dead
+ */
+bool is_dead(mazestruct_t *maze, int x, int y, int direction) {
+	//check coords
+	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
+		printf("Coordinates are out of range, cannot check wall.\n");
+		return false;
+	}
+	//return if spot to west is dead
+	if(direction == 0 && x > 0){
+
+		return maze->map[x-1][y]->dead;
+	}
+	//return if spot to north is dead
+	else if(direction == 1 && y > 0){
+
+		return maze->map[x][y-1]->dead;
+	}
+	//return if spot to south is dead
+	else if(direction == 2 && y < maze->height-1){
+
+		return maze->map[x][y+1]->dead;
+
+	}
+	//return if spot to east is dead
+	else if(direction == 3 && x < maze->width-1){
+
+		return maze->map[x+1][y]->dead;
+	}
+	else{
+		return false;
+	}
+}
+
 /**************** insert_dead_spot() ****************/
 /*
 * Marks a spot as being dead.
+* If there is no avatar on the spot draws four walls around it
 * Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar that visited it.
 *
 */
@@ -433,15 +471,18 @@ void insert_dead_spot(mazestruct_t *maze, int x,int y){
 	else{
 		//mark as dead
 		maze->map[x][y]->dead = true;
-		maze->map[x][y]->visited = false;
-		//add west wall
-		insert_wall(maze, x, y, 0);
-		//add north wall
-		insert_wall(maze, x, y, 1);
-		//add south wall
-		insert_wall(maze, x, y, 2);
-		//add east wall
-		insert_wall(maze, x, y, 3);
+		//if there are no avatars still on the spot...
+		if (!(maze->map[x][y]->avatar)) {
+		    maze->map[x][y]->visited = false;
+		    //add west wall
+		    insert_wall(maze, x, y, 0);
+		    //add north wall
+		    insert_wall(maze, x, y, 1);
+		    //add south wall
+		    insert_wall(maze, x, y, 2);
+		    //add east wall
+		    insert_wall(maze, x, y, 3);
+		}
 
 	}
 

@@ -8,11 +8,12 @@
  */
 
 /************* constants ***************/
-#define FOLLOW_THE_LEADER (5)
-#define FIRST_PRIORITY (4)
-#define SECOND_PRIORITY	(3)
-#define THIRD_PRIORITY (2)
-#define HAVE_TO_BACK_TRACK (1)
+#define FOLLOW_THE_LEADER (6)
+#define FIRST_PRIORITY (5)
+#define SECOND_PRIORITY	(4)
+#define THIRD_PRIORITY (3)
+#define HAVE_TO_BACK_TRACK (2)
+#define DEAD_SPOT (1)
 #define DONT_DO_IT (0)
 
 /************** includes ***************/
@@ -36,10 +37,10 @@ static void come_together(mazestruct_t * maze, Avatar *avatar,
 	avatar_move *best_move);
 static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	avatar_move *best_move);
-static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar, 
-	avatar_move *move);
-static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar, 
-	avatar_move *move);
+//static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar, 
+//	avatar_move *move);
+//static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar, 
+//	avatar_move *move);
 static bool same_pos(XYPos old_pos, XYPos new_pos);
 static void update_leader(mazestruct_t *maze, Avatar *avatar, XYPos old_pos, 
 	int direction);
@@ -65,7 +66,7 @@ void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
 	//avatar->leader = get_leader(maze, avatar->fd);
 
 	get_best_move(maze, avatar, move);
-	sleep(1);
+	//sleep(1);
 	if (!send_move(avatar->fd, move->direction, comm_sock)) {
 	    fprintf(stderr, "Error writing avatar %d's move to server.\n", 
 		avatar->fd);
@@ -154,9 +155,10 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	update_location(maze, old_pos.x, old_pos.y, avatar->pos.x,
 		avatar->pos.y, avatar->fd);
 
-	//if avatar was forced to backtrack it has reached a dead end
-	if (move->score == HAVE_TO_BACK_TRACK && (is_someone_adjacent(maze, 
-		    avatar->pos.x, avatar->pos.y, 3 - move->direction) == -1)) {
+	//if avatar was forced to backtrack or someone else has marked the
+	//spot they left as dead, insert the dead spot
+	if (is_dead(maze, avatar->pos.x, avatar->pos.y, 3-move->direction) || 
+		move->score == HAVE_TO_BACK_TRACK) {
 	    insert_dead_spot(maze, old_pos.x, old_pos.y);
 	}
 
@@ -210,12 +212,32 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
     best_move->score = -1; //stores score of best move so far
     int move_rank; //keeps score for the current move
     int num_bt_routes = 0; //in a perfect maze, there is only 1 backtrack route
+    int bt_route = 0;
+    int forward = 0;
+    int num_dead_spots = 0;
 
     for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	/***************** score the move *****************/
 	//if the move results in running into a wall
 	if (check_wall(maze, avatar->pos.x, avatar->pos.y, direction)) {
 	    move_rank = DONT_DO_IT;
+	}
+	//if the move results in entering a dead spot
+	else if (is_dead(maze, avatar->pos.x, avatar->pos.y, direction)) {
+	    move_rank = DEAD_SPOT;
+	    num_dead_spots++;
+	    //If there is more than one unwalled dead spot around you
+	    if (num_dead_spots == 1) {
+		forward = direction;
+	    }
+	    //then one is behind you and the other is in front
+	    else {
+		//be sure to never reenter a dead spot you just left
+		int prev_direction = get_last_direction(maze, avatar->fd);
+		if (direction != 3 - prev_direction) {
+		    forward = direction;
+		}
+	    }
 	}
 	//if the move results in potentially visiting a space visited by an 
 	//avatar I haven't crossed paths with
@@ -234,9 +256,55 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	    move_rank = THIRD_PRIORITY;
 	}
 	//if the move results in visiting a space I have already visited
+	//it is a backtrack
 	else {
 	    move_rank = HAVE_TO_BACK_TRACK;
 	    num_bt_routes++;
+	    //In a perfect maze there is only one backtrack route
+	    if (num_bt_routes == 1) {
+		bt_route = direction;
+	    }
+	    else {
+		int prev_direction = get_last_direction(maze, avatar->fd);
+		if (direction == 3 - prev_direction) {
+		    insert_wall(maze, avatar->pos.x, avatar->pos.y, bt_route);
+		    bt_route = direction;
+		}
+		else {
+		    insert_wall(maze, avatar->pos.x, avatar->pos.y, direction);
+		}
+	    }
+	    /*
+
+	    //get the direction avatar came from
+	    int last_move = get_last_direction(maze, avatar->fd);
+
+	    //get last move type
+	    int last_score = get_last_score(maze, avatar->fd);
+
+	    //if the last move was unsuccessul the backtrack route has
+	    //not changed so the direction being examined is the true
+	    //back track route
+	    if (check_wall(maze, avatar->pos.x, avatar->pos.y, last_move)) {
+		move_rank = HAVE_TO_BACK_TRACK;
+	    }
+	    else if (last_score == HAVE_TO_BACK_TRACK || 
+		    last_score == DEAD_SPOT) {
+		move_rank = HAVE_TO_BACK_TRACK;
+	    }
+	    if (!check_wall(maze, avatar->pos.x, avatar->pos.y, last_move)
+		    && last_score > HAVE_TO_BACK_TRACK) {
+		//otherwise, the true back track route is the position the 
+		//avatar just left and must be updated 
+		if (direction != 3 - last_move) {
+		    printf("inserting bt wall\n");
+		    insert_wall(maze, avatar->pos.x, avatar->pos.y, direction);
+		    move_rank = DONT_DO_IT;
+		}
+		//if the direction isn't the true backtrack route there must
+		//be a wall between the visited locations by me
+	    }
+	    */
 	}
 	//check how current move compares to the best_move
 	if (move_rank > best_move->score) {
@@ -244,7 +312,15 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	    best_move->score = move_rank;
 	}
     }
+    if (best_move->score == HAVE_TO_BACK_TRACK) {
+	best_move->direction = bt_route;
+    }
+    else if (best_move->score == DEAD_SPOT) {
+	best_move->direction = forward;
+    }
+
     /******************* Sanity checks ********************/
+    /*
     //if there is more than one potential backtrack route, only one is valid
     if (num_bt_routes > 1) {
 	//update the maze and your move so that they reflect only the valid one
@@ -252,7 +328,8 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
     }
     //last minute check if another avatar has just backtracked to or from my 
     //best move destination; updates the move accordingly
-    should_x_backtrack(maze, avatar, best_move);
+    //should_x_backtrack(maze, avatar, best_move);
+    */
 }
 
 /*
@@ -265,6 +342,8 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
  */
 static void come_together(mazestruct_t *maze, Avatar *avatar, 
 	avatar_move *best_move) {
+
+    best_move->score = -1;
     int move_rank; //keeps score for the current move
     int adj_avatar; //neighboring avatar
 
@@ -318,6 +397,7 @@ static void come_together(mazestruct_t *maze, Avatar *avatar,
  * Determines which route is an avatar's actual backtrack route by looking at
  * 	the avatar's last move which brought them to the current spot
  */
+/*
 static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar, 
 	avatar_move *move) {
 
@@ -327,7 +407,7 @@ static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar,
     for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	//if it is not the actual backtrack direction
 	if (did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction, 
-		    avatar->fd) && direction != true_bt_route) {
+		avatar->fd) && (direction != true_bt_route)) {
 	    //there is a wall in that direction
 	    insert_wall(maze, avatar->pos.x, avatar->pos.y, direction);
 	}
@@ -337,6 +417,7 @@ static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar,
 	move->direction = true_bt_route;
     }
 }
+*/
 
 /*
  * Checks if an adjacent avatar has visited more of the current region and thus
@@ -348,6 +429,7 @@ static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar,
  * If an adjacent avatar is awaree that the current avatar is backtracking from
  * 	a dead end the given avatar's move is updated accordingly
  */
+/*
 static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar, 
 	avatar_move *move) {
 
@@ -384,6 +466,7 @@ static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar,
 	}
     }
 }
+*/
 
 /*
  * Returns true if the old_pos is equal to the new_pos

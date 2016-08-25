@@ -190,6 +190,14 @@ bool have_paths_crossed(mazestruct_t *maze);
 
 int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id);
 bool cross_paths (int id1, int id2, mazestruct_t *maze);
+
+/****************** is_dead() ***********************/
+/*
+ * returns whether or not the spot in the a given direction from
+ * 	the spot at (x,y) is dead
+ */
+bool is_dead(mazestruct_t *maze, int x, int y, int direction);
+
 #endif
 
 
