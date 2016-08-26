@@ -12,20 +12,32 @@ specs about design can be found in the design.pdf file.
 * Running: `AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `      
 * Example: running a maze with 2 avatars on diffuculty 3: `AMStartup -n 2 -d 3 -h flume.cs.dartmouth.edu`   
 * Cleaning:  `make clean`
-* Exit Statuses: 
- * 0 - success 
- * 1 - failed 
- * 2 - unclear 
- * 3 - malloc error
- * 4 - unknown host 
- * 5 - failed connection 
- * 6 - message to server failed to be created 
- * 7 - avatar not created 
- * 8 - invalid number of avatars 
- * 9 - invalid difficulty number 
+
 
 ## Inputs 
-`AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `    
+`AMStartup -n [numberOfAvatars] -d [difficultyMaze] -h [hostname] `    
+
+* -n numberOfAvatars - number of avatars to place in maze
+ * must be an int
+ * must lie in range specified at server with hostname (in case of flume.cs.dartmouth.edu: 1 <= numberOfAvatars <= 10
+* -d difficultyMaze - difficulty of the maze
+ * must be an int 
+ * must lie in range specified at server with hostname (in case of flume.cs.dartmouth.edu: 0 <= difficultyMaze <= 9
+
+## Exit Statuses 
+Exit Statuses:     
+
+* 0 - success 
+* 1 - failed 
+* 2 - unclear 
+* 3 - malloc error
+* 4 - unknown host 
+* 5 - failed connection 
+* 6 - message to server failed to be created 
+* 7 - avatar not created 
+* 8 - invalid number of avatars 
+* 9 - invalid difficulty number 
+
 
 ## File Structure
 * **AMStartup**: main entry point   
