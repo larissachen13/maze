@@ -130,7 +130,7 @@ int main (int argc, char* argv[]) {
   snprintf(filename, len, "Amazing_%s_%d_%d.log", getenv("USER"), n, d);
   logfile = fopen(filename, "w");
   time(&date);
-  fprintf(logfile, "%s, 10829, `%s`\n", getenv("USER"), ctime(&date));
+  fprintf(logfile, "%s, 10829, %s*************************\n", getenv("USER"), ctime(&date));
 
   //stuff needed to create and run threads
   void *thread_status;

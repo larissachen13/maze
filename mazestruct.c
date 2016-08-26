@@ -774,9 +774,15 @@ void delete_maze(mazestruct_t *maze){
 			}
 		}
 
-		for(int n = 0; n < 10; n++){
+		for(int n = 0; n < maze->num_avatars; n++){
 			if(maze->crossed_with[n] != NULL){
+				for(int j = (n + 1); j < maze->num_avatars; j++){
+					if(maze->crossed_with[j] == maze->crossed_with[n]){
+						maze->crossed_with[j] = NULL;
+					}
+				}
 				free(maze->crossed_with[n]);
+				maze->crossed_with[n] = NULL;
 			}
 		}
 
