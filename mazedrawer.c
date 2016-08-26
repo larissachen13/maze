@@ -1,6 +1,15 @@
+/*
+* A file to draw the avatars moving through the maze using GTK and Cairo graphics
+* Much of the setting up of the refreshing was done studying the timer.c code from "http://zetcode.com/gui/gtk2/gtkevents/".
+*
+*/
+
 #include <cairo.h>
 #include <gtk/gtk.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include "mazestruct.h"
 
 #define WINDOW_WIDTH 830
 #define WINDOW_HEIGHT 830
@@ -10,9 +19,7 @@ gchar buf[256];
 gint x = 0;
 
 
-gboolean on_expose_event(GtkWidget *widget,
-    GdkEventExpose *event,
-    gpointer data) {
+gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data) {
         
   cairo_t *cr;
 
@@ -56,22 +63,25 @@ gboolean on_expose_event(GtkWidget *widget,
 
   cairo_destroy(cr);
 
-  return FALSE;
+  return false;
 }
 
 gboolean time_handler(GtkWidget *widget) {
     
-  if (widget->window == NULL) return FALSE;
+  if (widget->window == NULL){
+    return false;
+  }
 
   x += 5;
 
   gtk_widget_queue_draw(widget);
   
-  return TRUE;
+  return true;
 }
 
 int main(int argc, char *argv[]) {
 
+  //variable to hold the window and the are to draw on
   GtkWidget *window;
   GtkWidget *darea;
 
@@ -82,10 +92,8 @@ int main(int argc, char *argv[]) {
   darea = gtk_drawing_area_new();
   gtk_container_add(GTK_CONTAINER(window), darea);
 
-  g_signal_connect(darea, "expose-event",
-      G_CALLBACK(on_expose_event), NULL);
-  g_signal_connect(window, "destroy",
-      G_CALLBACK(gtk_main_quit), NULL);
+  g_signal_connect(darea, "expose-event", G_CALLBACK(on_expose_event), NULL);
+  g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_window_set_default_size(GTK_WINDOW(window), WINDOW_HEIGHT, WINDOW_WIDTH);
