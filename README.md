@@ -1,3 +1,6 @@
+# Maze Challenge *by Core Dumped in a Maze* 
+
+
 create new repository:
 
 - git clone https://gitlab.cs.dartmouth.edu/benjihannam/maze.git
