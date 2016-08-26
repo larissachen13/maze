@@ -17,8 +17,8 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <time.h>
-#include "amazing.h"
-#include "thread_ops.h"
+#include "lib/amazing.h"
+#include "thread_ops/thread_ops.h"
 
 /******************** function prototypes ******************/
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server);
@@ -132,7 +132,8 @@ int main (int argc, char* argv[]) {
   fprintf(logfile, "%s, 10829, %s*************************\n", getenv("USER"), ctime(&date));
 
   //stuff needed to create and run threads
-  void *thread_status;
+  int kk = 1;
+  void *thread_status = &kk;
   pthread_t avatars[AM_MAX_AVATAR];
   thread_data_t *params;
   if (pthread_mutex_init(&my_turn, NULL) != 0) {
@@ -166,7 +167,8 @@ int main (int argc, char* argv[]) {
       }
   }
 
-  //check for return status from threads 
+
+  //check for return status from threads
   switch(*(int *)thread_status) {
      case 0 :
         printf("Thread status: 0 Success!\n");

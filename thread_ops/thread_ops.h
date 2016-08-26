@@ -5,9 +5,9 @@
 * Larissa Chen, July 2016
 * Team: core_dumped_in_a_maze
 */
-#include "amazing.h"
-#include "mazestruct.h"
-#include "avatar.h"
+#include "../lib/amazing.h"
+#include "../lib/mazestruct.h"
+#include "../lib/avatar.h"
 
 #ifndef __THREAD_OPS_H
 #define __THREAD_OPS_H

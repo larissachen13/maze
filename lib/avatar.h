@@ -37,7 +37,7 @@
  * 	4. Visiting a space I have already visited
  * 	5. Don't run into a known wall!!!
  */
-void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock, 
+void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
 	AM_Message *msg_buff);
 
 /*

@@ -66,7 +66,7 @@ void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
 	//avatar->leader = get_leader(maze, avatar->fd);
 
 	get_best_move(maze, avatar, move);
-	//sleep(1);
+	// sleep();
 	if (!send_move(avatar->fd, move->direction, comm_sock)) {
 	    fprintf(stderr, "Error writing avatar %d's move to server.\n",
 		avatar->fd);

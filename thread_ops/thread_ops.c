@@ -25,7 +25,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "thread_ops.h"
-#include "mazestruct.h"
+#include "../lib/mazestruct.h"
 
 /************ local function prototypes ************/
 //int generate_avatars(int num_avatars, int maze_port, char *host_name);
@@ -52,7 +52,7 @@ void *avatar_thread(void *params) {
 	  thread_data->maze_port, thread_data->host_name);
 
   free(thread_data);
-  pthread_exit(&ret_status); 
+  pthread_exit(&ret_status);
 }
 
 /**************** run_avatar_thread ****************/
@@ -60,7 +60,7 @@ static int run_avatar_thread(int avatar_id, mazestruct_t *maze, int maze_port,
 	char *hostname) {
 
     //declarations
-    int ret_status;
+    int ret_status = 1;
     int comm_sock;
 
     //initialize needed structs

@@ -602,11 +602,11 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 
 /**************** is_someone_here() ****************/
 /*
-* Checks if there is an avatar other than the one with the given id at the 
+* Checks if there is an avatar other than the one with the given id at the
 * 	current spot dictated by x and y.
 * Takes in the maze struct, x,y coordinates and the id of the avatar checking
 * 	if another avatar is present.
-* Returns the lowest avatar id if another avatar is on the spot 
+* Returns the lowest avatar id if another avatar is on the spot
 * 	and -1 if none is found.
 */
 int is_someone_here(mazestruct_t *maze, int x, int y, int id){
@@ -728,7 +728,7 @@ bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 
 /**************** who_visited() ****************/
 /*
-* Returns the lowest numbered of id of the an avatar who's path is adjacent but 
+* Returns the lowest numbered of id of the an avatar who's path is adjacent but
 * has not crossed paths with the current avatar.
 * Returns -1 if no such avatar exist.
 */
@@ -753,7 +753,7 @@ int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id) 
 void delete_maze(mazestruct_t *maze){
 
 	if(maze != NULL){
-	    	//add one for the last move  
+	    	//add one for the last move
 		maze->move_count++;
 		//print the total number of moves
 		printf("TOTAL NUMBER OF MOVES: %d\n", maze->move_count);
@@ -786,7 +786,7 @@ void delete_maze(mazestruct_t *maze){
 			}
 		}
 
-		
+
 		free(maze);
 	}
 }

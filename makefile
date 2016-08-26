@@ -4,8 +4,8 @@
 # Team core_dumped_in_a_maze
 
 PROG = AMStartup
-OBJS = AMStartup.o thread_ops.o mazestruct.o avatar.o
-# LLIBS = ../lib/lib.a
+OBJS = AMStartup.o ./thread_ops/thread_ops.o
+LLIBS = ./lib/lib.a
 
 CFLAGS = -Wall -pedantic -std=c11 -ggdb -lpthread
 CC = gcc
@@ -16,14 +16,12 @@ $(PROG): $(OBJS) $(LLIBS)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # crawler source dependencies; add others as needed
-AMStartup.o: amazing.h thread_ops.h
-thread_ops.o: thread_ops.h mazestruct.h
-mazestruct.o: mazestruct.h
-avatar.o: avatar.h
+AMStartup.o: ./thread_ops/thread_ops.h
+./thread_ops/thread_ops.o: ./thread_ops/thread_ops.h ./lib/mazestruct.h
 
 # build the library
-../lib/lib.a:
-	cd ../lib; $(MAKE)
+./lib/lib.a:
+	cd ./lib; $(MAKE)
 
 .PHONY: clean
 
@@ -34,3 +32,4 @@ clean:
 	rm -f core.*
 	rm -f vgcore.*
 	rm -f $(PROG)
+	cd ./lib; $(MAKE) clean
