@@ -47,6 +47,7 @@ typedef struct mazestruct{
 	int leader_array[10];
 	int *crossed_with[10];
 	FILE* fp;
+	bool is_solved;
 } mazestruct_t;
 
 
@@ -123,6 +124,7 @@ mazestruct_t* maze_new(int height, int width, int num_avatars, FILE* fp){
 	new_maze->move_count = 0;
 	new_maze->number_leaders = num_avatars;
 	new_maze->fp = fp;
+	new_maze->is_solved = false;
 
 	//initialise the array for last moves
 	for (int i = 0; i < 10; i++){
@@ -953,5 +955,9 @@ bool have_paths_crossed(mazestruct_t *maze){
 *
 */
 void print_solved(mazestruct_t *maze){
-	fprintf(maze->fp, "SOLVED THE MAZE in %d moves.\n", maze->move_count);
+
+	if(!maze->is_solved){
+		maze->is_solved = true;
+		fprintf(maze->fp, "SOLVED THE MAZE in %d moves.\n", maze->move_count);
+	}
 }
