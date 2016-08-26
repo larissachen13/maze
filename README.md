@@ -1,4 +1,3 @@
-
 # Maze Challenge *by Core Dumped in a Maze* 
 
 Maze challenge is a standalone program that simulates a group of friends
@@ -37,6 +36,7 @@ Exit Statuses:
 * 7 - avatar not created 
 * 8 - invalid number of avatars 
 * 9 - invalid difficulty number 
+* 10 - missing arguments 
 
 
 ## File Structure
