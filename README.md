@@ -36,7 +36,7 @@ Exit Statuses:
 * 7 - avatar not created 
 * 8 - invalid number of avatars 
 * 9 - invalid difficulty number 
-* 10 - missing arguments 
+* 10 - missing argument or invalid option argument
 
 
 ## File Structure
