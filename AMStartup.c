@@ -16,6 +16,7 @@
 #include <getopt.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <time.h>
 #include "amazing.h"
 #include "thread_ops.h"
 
@@ -46,6 +47,7 @@ int main (int argc, char* argv[]) {
   int maze_width, maze_height;
   FILE *logfile;
   int avatar_success;
+  time_t date;
 
 
   // 1. Validate and parse arguments
@@ -127,7 +129,8 @@ int main (int argc, char* argv[]) {
   char filename[len];
   snprintf(filename, len, "Amazing_%s_%d_%d.log", getenv("USER"), n, d);
   logfile = fopen(filename, "w");
-  fclose(logfile);
+  time(&date);
+  fprintf(logfile, "%s, 10829, `%s`\n", getenv("USER"), ctime(&date));
 
   //stuff needed to create and run threads
   void *thread_status;
@@ -138,7 +141,7 @@ int main (int argc, char* argv[]) {
       close(comm_sock);
       exit(5);
   }
-  else if ((maze = maze_new(maze_height, maze_width, n)) == NULL) {
+  else if ((maze = maze_new(maze_height, maze_width, n, logfile)) == NULL) {
       perror("Maze could not be created.\n");
       close(comm_sock);
       exit(6);
@@ -164,6 +167,7 @@ int main (int argc, char* argv[]) {
       }
   }
   //delete maze
+  fclose(logfile);
   delete_maze(maze);
   //free the params
   close(comm_sock);

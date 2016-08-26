@@ -28,21 +28,21 @@
 extern bool avatars_unite;
 
 /*********************** local function prototypes ************************/
-static void get_best_move(mazestruct_t *maze, Avatar *avatar, 
+static void get_best_move(mazestruct_t *maze, Avatar *avatar,
 	avatar_move *best_move);
 static bool send_move(uint32_t avatar_id, uint32_t direction, int comm_sock);
-static void update_maze(mazestruct_t *maze, XYPos old_pos, 
+static void update_maze(mazestruct_t *maze, XYPos old_pos,
 	avatar_move *move, Avatar *avatar);
-static void come_together(mazestruct_t * maze, Avatar *avatar, 
+static void come_together(mazestruct_t * maze, Avatar *avatar,
 	avatar_move *best_move);
 static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	avatar_move *best_move);
-//static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar, 
+//static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar,
 //	avatar_move *move);
-//static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar, 
+//static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar,
 //	avatar_move *move);
 static bool same_pos(XYPos old_pos, XYPos new_pos);
-static void update_leader(mazestruct_t *maze, Avatar *avatar, XYPos old_pos, 
+static void update_leader(mazestruct_t *maze, Avatar *avatar, XYPos old_pos,
 	int direction);
 
 /**************************** global functions *****************************/
@@ -50,11 +50,11 @@ static void update_leader(mazestruct_t *maze, Avatar *avatar, XYPos old_pos,
  * Method to move a given avatar
  * See avatar.h for full description
  */
-void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock, 
+void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
 	AM_Message *msg_buff) {
 
     avatar_move *move;
-    
+
     if ((move = malloc(sizeof(avatar_move))) == NULL) {
 	fprintf(stderr, "Avatar %d could not make move due to malloc error.\n",
 		avatar->fd);
@@ -62,18 +62,18 @@ void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
     else {
 	//save current position can check later if move was successful
 	XYPos old_pos = avatar->pos;
-	
+
 	//avatar->leader = get_leader(maze, avatar->fd);
 
 	get_best_move(maze, avatar, move);
 	//sleep(1);
 	if (!send_move(avatar->fd, move->direction, comm_sock)) {
-	    fprintf(stderr, "Error writing avatar %d's move to server.\n", 
+	    fprintf(stderr, "Error writing avatar %d's move to server.\n",
 		avatar->fd);
 	}
-	
+
 	wait_for_response(comm_sock, msg_buff);
-	
+
 	if (ntohl(msg_buff->type) == AM_AVATAR_TURN) {
 	    //update avatar position based on response
 	    avatar->pos.x = ntohl(msg_buff->avatar_turn.Pos[avatar->fd].x);
@@ -102,7 +102,7 @@ void wait_for_response(int comm_sock, AM_Message *msg_buff) {
  * Determines an avatar's next move using the shared maze knowledge of all the
  * 	avatars and the avatar's current position
  */
-static void get_best_move(mazestruct_t *maze, Avatar *avatar, 
+static void get_best_move(mazestruct_t *maze, Avatar *avatar,
 	avatar_move *best_move) {
 
     //if there is a common path already identified, unite
@@ -137,7 +137,7 @@ static bool send_move(uint32_t avatar_id, uint32_t direction, int comm_sock) {
  * Updates the shared map of the maze based on an avatar's last move, former
  * 	position, and current positon
  */
-static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move, 
+static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	Avatar *avatar){
 
     //update last move so everyone knows
@@ -157,13 +157,13 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 
 	//if avatar was forced to backtrack or someone else has marked the
 	//spot they left as dead, insert the dead spot
-	if (is_dead(maze, avatar->pos.x, avatar->pos.y, 3-move->direction) || 
+	if (is_dead(maze, avatar->pos.x, avatar->pos.y, 3-move->direction) ||
 		move->score == HAVE_TO_BACK_TRACK) {
 	    insert_dead_spot(maze, old_pos.x, old_pos.y);
 	}
 
-	//if avatar is now following a new avatar... 
-	else if (move->score == FOLLOW_THE_LEADER && move->direction != 
+	//if avatar is now following a new avatar...
+	else if (move->score == FOLLOW_THE_LEADER && move->direction !=
 		M_NULL_MOVE) {
 	    update_leader(maze, avatar, old_pos, move->direction);
 	    //mark the newly visited space and the fact paths have crossed
@@ -174,7 +174,7 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	//if you have successfully crossed paths with a new avatar
 	else if (move->score == FIRST_PRIORITY) {
 	    //find out who that avatar was
-	    int adj_path = who_visited(maze, old_pos.x, old_pos.y, 
+	    int adj_path = who_visited(maze, old_pos.x, old_pos.y,
 		    move->direction, avatar->fd);
 	    if (adj_path != -1) {
 		//alert everyone you have crossed paths with that avatar
@@ -206,7 +206,7 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
  *
  * See avatar.h for details on priorities
  */
-static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar, 
+static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	avatar_move *best_move) {
 
     best_move->score = -1; //stores score of best move so far
@@ -239,9 +239,9 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 		}
 	    }
 	}
-	//if the move results in potentially visiting a space visited by an 
+	//if the move results in potentially visiting a space visited by an
 	//avatar I haven't crossed paths with
-	else if ((who_visited(maze, avatar->pos.x, avatar->pos.y, direction, 
+	else if ((who_visited(maze, avatar->pos.x, avatar->pos.y, direction,
 			avatar->fd)) != -1) {
 	    move_rank = FIRST_PRIORITY;
 	}
@@ -251,7 +251,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	}
 	//if the move results in potentially visiting a space visited by
 	//a different avatar I have crossed paths with
-	else if(!did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction, 
+	else if(!did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction,
 		    avatar->fd)) {
 	    move_rank = THIRD_PRIORITY;
 	}
@@ -288,14 +288,14 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	    if (check_wall(maze, avatar->pos.x, avatar->pos.y, last_move)) {
 		move_rank = HAVE_TO_BACK_TRACK;
 	    }
-	    else if (last_score == HAVE_TO_BACK_TRACK || 
+	    else if (last_score == HAVE_TO_BACK_TRACK ||
 		    last_score == DEAD_SPOT) {
 		move_rank = HAVE_TO_BACK_TRACK;
 	    }
 	    if (!check_wall(maze, avatar->pos.x, avatar->pos.y, last_move)
 		    && last_score > HAVE_TO_BACK_TRACK) {
-		//otherwise, the true back track route is the position the 
-		//avatar just left and must be updated 
+		//otherwise, the true back track route is the position the
+		//avatar just left and must be updated
 		if (direction != 3 - last_move) {
 		    printf("inserting bt wall\n");
 		    insert_wall(maze, avatar->pos.x, avatar->pos.y, direction);
@@ -326,7 +326,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	//update the maze and your move so that they reflect only the valid one
 	get_true_backtrack_route(maze, avatar, best_move);
     }
-    //last minute check if another avatar has just backtracked to or from my 
+    //last minute check if another avatar has just backtracked to or from my
     //best move destination; updates the move accordingly
     //should_x_backtrack(maze, avatar, best_move);
     */
@@ -340,7 +340,7 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
  *
  * See avatar.h for details
  */
-static void come_together(mazestruct_t *maze, Avatar *avatar, 
+static void come_together(mazestruct_t *maze, Avatar *avatar,
 	avatar_move *best_move) {
 
     best_move->score = -1;
@@ -353,7 +353,7 @@ static void come_together(mazestruct_t *maze, Avatar *avatar,
 	best_move->score = get_last_score(maze, avatar->leader);
 	return;
     }
-    //otherwise... 
+    //otherwise...
     for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	/**************** score the move *****************/
 	//if the move results in running into a wall
@@ -365,7 +365,7 @@ static void come_together(mazestruct_t *maze, Avatar *avatar,
 	    move_rank = DONT_DO_IT;
 	}
 	//if the move results in potentially meeting another avatar
-	else if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x, 
+	else if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x,
 		    avatar->pos.y, direction)) != -1) {
 	    //lowest number avatar id will be the leader
 	    if (avatar->fd < adj_avatar) {
@@ -375,7 +375,7 @@ static void come_together(mazestruct_t *maze, Avatar *avatar,
 	}
 	//if the move results in potentially visiting a space visited by
 	//a different avatar
-	else if(!did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction, 
+	else if(!did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction,
 		    avatar->fd)) {
 	    move_rank = SECOND_PRIORITY;
 	}
@@ -398,7 +398,7 @@ static void come_together(mazestruct_t *maze, Avatar *avatar,
  * 	the avatar's last move which brought them to the current spot
  */
 /*
-static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar, 
+static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar,
 	avatar_move *move) {
 
     //get the direction avatar came from; it is the actual backtrack route
@@ -406,7 +406,7 @@ static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar,
     //get all the directions you scored as HAVE_TO_BACK_TRACK
     for (int direction = M_WEST; direction < M_NUM_DIRECTIONS; direction++) {
 	//if it is not the actual backtrack direction
-	if (did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction, 
+	if (did_x_visit(maze, avatar->pos.x, avatar->pos.y, direction,
 		avatar->fd) && (direction != true_bt_route)) {
 	    //there is a wall in that direction
 	    insert_wall(maze, avatar->pos.x, avatar->pos.y, direction);
@@ -430,7 +430,7 @@ static void get_true_backtrack_route(mazestruct_t *maze, Avatar *avatar,
  * 	a dead end the given avatar's move is updated accordingly
  */
 /*
-static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar, 
+static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar,
 	avatar_move *move) {
 
     //variable declarations
@@ -439,12 +439,12 @@ static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar,
     int adj_avatar_score;
 
     //see if there is an avatar on my destination
-    if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x, avatar->pos.y, 
+    if ((adj_avatar = is_someone_adjacent(maze, avatar->pos.x, avatar->pos.y,
 		    move->direction)) != -1) {
 	adj_avatar_move = get_last_direction(maze, adj_avatar);
 	adj_avatar_score = get_last_score(maze, adj_avatar);
-	//if that avatar just backtracked from my current position, 
-	if ((adj_avatar_move == move->direction) && (adj_avatar_score == 
+	//if that avatar just backtracked from my current position,
+	if ((adj_avatar_move == move->direction) && (adj_avatar_score ==
 		HAVE_TO_BACK_TRACK)) {
 	    //backtrack with them
 	    move->direction = adj_avatar_move;
@@ -452,13 +452,13 @@ static void should_x_backtrack(mazestruct_t *maze, Avatar *avatar,
 	}
     }
     //see if there is an avatar at my current position
-    else if ((adj_avatar = is_someone_here(maze, avatar->pos.x, 
+    else if ((adj_avatar = is_someone_here(maze, avatar->pos.x,
 		avatar->pos.y, avatar->fd)) != -1) {
 	printf("we are on the same space\n");
 	adj_avatar_move = get_last_direction(maze, adj_avatar);
 	adj_avatar_score = get_last_score(maze, adj_avatar);
-	//if they just backtracked from my current destination 
-	if ((adj_avatar_move == (3 - move->direction)) && (adj_avatar_score == 
+	//if they just backtracked from my current destination
+	if ((adj_avatar_move == (3 - move->direction)) && (adj_avatar_score ==
 		HAVE_TO_BACK_TRACK)) {
 	    //wait and follow them out of dead end on next turn
 	    move->direction = M_NULL_MOVE;
@@ -483,8 +483,7 @@ static void update_leader(mazestruct_t *maze, Avatar *avatar, XYPos old_pos,
 	int direction) {
     //update avatar's leader
     avatar->leader = is_someone_adjacent(maze, old_pos.x, old_pos.y, direction);
-    //update leader statistics in maze 
+    //update leader statistics in maze
     remove_leader(maze, avatar->fd);
     set_leader(maze, avatar->fd, avatar->leader);
 }
-

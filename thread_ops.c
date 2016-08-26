@@ -29,7 +29,7 @@
 /************ local function prototypes ************/
 //int generate_avatars(int num_avatars, int maze_port, char *host_name);
 
-static int run_avatar_thread(int avatar_id, mazestruct_t *maze, int maze_port, 
+static int run_avatar_thread(int avatar_id, mazestruct_t *maze, int maze_port,
 	char *hostname);
 static Avatar *initialize_avatar(int id);
 static int connect_to_server(int *comm_sock, char *hostname, int maze_port);
@@ -174,7 +174,7 @@ static int send_am_avatar_ready(Avatar *my_avatar, AM_Message *msg_buff,
  */
 static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 	AM_Message *msg_buff) {
-    
+
     int ret_status;
 
     wait_for_response(comm_sock, msg_buff);
@@ -182,7 +182,7 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 	//update avatar position based on response
 	my_avatar->pos.x = ntohl(msg_buff->avatar_turn.Pos[my_avatar->fd].x);
 	my_avatar->pos.y = ntohl(msg_buff->avatar_turn.Pos[my_avatar->fd].y);
-	//printf("Avatar %d's new position is (%d, %d).\n", my_avatar->fd, 
+	//printf("Avatar %d's new position is (%d, %d).\n", my_avatar->fd,
 		//my_avatar->pos.x, my_avatar->pos.y);
 	pthread_mutex_lock(&my_turn);
 	place_avatar(maze, my_avatar->pos.x, my_avatar->pos.y, my_avatar->fd);
@@ -210,6 +210,7 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     // once loop is ended, either maze has been solved or an error occured
     switch (ntohl(msg_buff->type)) {
 	case (AM_MAZE_SOLVED):
+			fprintf(maze->fp, "Maze was solved!\n"); 
 	    printf("The maze was solved!!!!\n");
 	    ret_status = SUCCESS;
 	    break;
@@ -225,4 +226,3 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     }
     return ret_status;
 }
-
