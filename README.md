@@ -32,7 +32,7 @@ Exit Statuses:
 * 3 - malloc error
 * 4 - unknown host 
 * 5 - failed connection 
-* 6 - message to server failed to be created 
+* 6 - reading or writing message fail 
 * 7 - avatar not created 
 * 8 - invalid number of avatars 
 * 9 - invalid difficulty number 
