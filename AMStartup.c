@@ -46,7 +46,6 @@ int main (int argc, char* argv[]) {
   int maze_port;
   int maze_width, maze_height;
   FILE *logfile;
-  int avatar_success;
   time_t date;
 
 
@@ -166,6 +165,19 @@ int main (int argc, char* argv[]) {
 	  pthread_join(avatars[i], &thread_status);
       }
   }
+
+  //check for return status from threads 
+  switch(*(int *)thread_status) {
+     case 0 :
+        printf("Thread status: 0 Success!\n");
+        break;
+     case 1 :
+        printf("Thread status: 1 Failure!\n");
+        break;
+     default :
+       printf("Unknown thread status\n");
+  }
+
   //delete maze
   fclose(logfile);
   delete_maze(maze);

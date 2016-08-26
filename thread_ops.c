@@ -52,7 +52,7 @@ void *avatar_thread(void *params) {
 	  thread_data->maze_port, thread_data->host_name);
 
   free(thread_data);
-  return((void *)ret_status);
+  pthread_exit(&ret_status); 
 }
 
 /**************** run_avatar_thread ****************/
@@ -211,7 +211,7 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     // once loop is ended, either maze has been solved or an error occured
     switch (ntohl(msg_buff->type)) {
 	case (AM_MAZE_SOLVED):
-		print_solved(maze); 
+		print_solved(maze);
 	    printf("The maze was solved!!!!\n");
 	    ret_status = SUCCESS;
 	    break;
