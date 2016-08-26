@@ -47,12 +47,13 @@ extern pthread_mutex_t my_turn;
 /**************** avatar_thread ****************/
 void *avatar_thread(void *params) {
   thread_data_t *thread_data = (thread_data_t *)params;
+	int *ret_status = malloc(sizeof(int));
 
-  int ret_status = run_avatar_thread(thread_data->id, maze,
+  *ret_status = run_avatar_thread(thread_data->id, maze,
 	  thread_data->maze_port, thread_data->host_name);
 
   free(thread_data);
-  pthread_exit(&ret_status);
+  pthread_exit(ret_status);
 }
 
 /**************** run_avatar_thread ****************/
