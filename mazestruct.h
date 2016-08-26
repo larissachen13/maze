@@ -53,7 +53,7 @@ void place_avatar(mazestruct_t *maze, int x, int y, int avatar_number);
 * Takes in a pointer to a maze struct, a pair of x,y coordinates and a direction denoted by:
 * 0 = west, 1 = north, 2 = south and 3 = west.
 */
-void insert_wall(mazestruct_t *maze, int x, int y, int direction);
+void insert_wall(mazestruct_t *maze, int x, int y, int direction, int avatar_id);
 
 /**************** visited_spot() ****************/
 /*
@@ -69,7 +69,7 @@ void visited_spot(mazestruct_t *maze, int x, int y, int avatar_number);
 * Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar that visited it.
 * 
 */
-void insert_dead_spot(mazestruct_t *maze, int x,int y);
+void insert_dead_spot(mazestruct_t *maze, int x,int y, int avatar_id);
 
 /**************** check_wall() ****************/
 /*
@@ -210,6 +210,13 @@ bool cross_paths (int id1, int id2, mazestruct_t *maze);
  * 	the spot at (x,y) is dead
  */
 bool is_dead(mazestruct_t *maze, int x, int y, int direction);
+
+/**************** print_solved() ****************/
+/*
+* Prints the maze solved message
+*
+*/
+void print_solved(mazestruct_t *maze);
 
 #endif
 

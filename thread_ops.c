@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "thread_ops.h"
+#include "mazestruct.h"
 
 /************ local function prototypes ************/
 //int generate_avatars(int num_avatars, int maze_port, char *host_name);
@@ -210,7 +211,7 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     // once loop is ended, either maze has been solved or an error occured
     switch (ntohl(msg_buff->type)) {
 	case (AM_MAZE_SOLVED):
-			fprintf(maze->fp, "Maze was solved!\n"); 
+		print_solved(maze); 
 	    printf("The maze was solved!!!!\n");
 	    ret_status = SUCCESS;
 	    break;

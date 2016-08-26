@@ -17,7 +17,7 @@ $(PROG): $(OBJS) $(LLIBS)
 
 # crawler source dependencies; add others as needed
 AMStartup.o: amazing.h thread_ops.h
-thread_ops.o: thread_ops.h
+thread_ops.o: thread_ops.h mazestruct.h
 mazestruct.o: mazestruct.h
 avatar.o: avatar.h
 

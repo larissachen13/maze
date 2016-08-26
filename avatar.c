@@ -145,7 +145,7 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 
     //if move failed add a wall to the maze at that spot
     if ((move->direction != M_NULL_MOVE) && same_pos(old_pos, avatar->pos)) {
-	    insert_wall(maze, avatar->pos.x, avatar->pos.y, move->direction);
+	    insert_wall(maze, avatar->pos.x, avatar->pos.y, move->direction, avatar->fd);
     }
 
     //otherwise...
@@ -159,7 +159,7 @@ static void update_maze(mazestruct_t *maze, XYPos old_pos, avatar_move *move,
 	//spot they left as dead, insert the dead spot
 	if (is_dead(maze, avatar->pos.x, avatar->pos.y, 3-move->direction) ||
 		move->score == HAVE_TO_BACK_TRACK) {
-	    insert_dead_spot(maze, old_pos.x, old_pos.y);
+	    insert_dead_spot(maze, old_pos.x, old_pos.y, avatar->fd);
 	}
 
 	//if avatar is now following a new avatar...
@@ -267,11 +267,11 @@ static void get_best_move_helper(mazestruct_t *maze, Avatar *avatar,
 	    else {
 		int prev_direction = get_last_direction(maze, avatar->fd);
 		if (direction == 3 - prev_direction) {
-		    insert_wall(maze, avatar->pos.x, avatar->pos.y, bt_route);
+		    insert_wall(maze, avatar->pos.x, avatar->pos.y, bt_route, avatar->fd);
 		    bt_route = direction;
 		}
 		else {
-		    insert_wall(maze, avatar->pos.x, avatar->pos.y, direction);
+		    insert_wall(maze, avatar->pos.x, avatar->pos.y, direction, avatar->fd);
 		}
 	    }
 	    /*

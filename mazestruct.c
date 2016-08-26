@@ -325,7 +325,7 @@ void place_avatar(mazestruct_t *maze, int x, int y, int avatar_id){
 		//print the update
 		printf("\n********************************************************************************\n");
 		printf("Inserted avatar %d at %d,%d.\n", avatar_id, x, y);
-		fprintf(fp, "Inserted avatar %d at %d,%d.\n", avatar_id, x, y);
+		fprintf(maze->fp, "Inserted avatar %d at %d,%d.\n", avatar_id, x, y);
 		maze_print(maze);
 		printf("********************************************************************************\n");
 	}
@@ -340,7 +340,7 @@ void place_avatar(mazestruct_t *maze, int x, int y, int avatar_id){
 * Takes in a pointer to a maze struct, a pair of x,y coordinates and a direction denoted by:
 * 0 = west, 1 = north, 2 = south and 3 = west.
 */
-void insert_wall(mazestruct_t *maze, int x, int y, int direction){
+void insert_wall(mazestruct_t *maze, int x, int y, int direction, int avatar_id){
 
 	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
 		printf("Coordinates are out of range\n");
@@ -360,7 +360,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted west wall at %d,%d.\n", x, y);
-			fprintf(maze->fp, "Ran into west wall at %d,%d.\n", x, y);
+			fprintf(maze->fp, "Avatar %d ran into west wall at %d,%d.\n", avatar_id, x, y);
 		}
 	}
 	if(direction == 1){
@@ -371,7 +371,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted north wall at %d,%d.\n", x, y);
-			fprintf(maze->fp, "Ran into north wall at %d,%d.\n", x, y);
+			fprintf(maze->fp, "Avatar %d ran into north wall at %d,%d.\n", avatar_id, x, y);
 		}
 	}
 	if(direction == 2){
@@ -382,7 +382,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted south wall at %d,%d.\n", x, y);
-			fprintf(maze->fp, "Ran into south wall at %d,%d.\n", x, y);
+			fprintf(maze->fp, "Avatar %d ran into south wall at %d,%d.\n", avatar_id, x, y);
 		}
 	}
 	if(direction == 3){
@@ -393,7 +393,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted east wall at %d,%d.\n", x, y);
-			fprintf(maze->fp, "Ran into east wall at %d,%d.\n", x, y);
+			fprintf(maze->fp, "Avatar %d ran into east wall at %d,%d.\n", avatar_id, x, y);
 		}
 	}
 
@@ -469,7 +469,7 @@ bool is_dead(mazestruct_t *maze, int x, int y, int direction) {
 * Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar that visited it.
 *
 */
-void insert_dead_spot(mazestruct_t *maze, int x,int y){
+void insert_dead_spot(mazestruct_t *maze, int x,int y, int avatar_id){
 
 	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
 		printf("Coordinates are out of range, could not insert dead spot.\n");
@@ -482,13 +482,13 @@ void insert_dead_spot(mazestruct_t *maze, int x,int y){
 		if (!(maze->map[x][y]->avatar)) {
 		    maze->map[x][y]->visited = false;
 		    //add west wall
-		    insert_wall(maze, x, y, 0);
+		    insert_wall(maze, x, y, 0, avatar_id);
 		    //add north wall
-		    insert_wall(maze, x, y, 1);
+		    insert_wall(maze, x, y, 1, avatar_id);
 		    //add south wall
-		    insert_wall(maze, x, y, 2);
+		    insert_wall(maze, x, y, 2, avatar_id);
 		    //add east wall
-		    insert_wall(maze, x, y, 3);
+		    insert_wall(maze, x, y, 3, avatar_id);
 		}
 
 	}
@@ -945,4 +945,13 @@ bool have_paths_crossed(mazestruct_t *maze){
 	else{
 		return false;
 	}
+}
+
+/**************** print_solved() ****************/
+/*
+* Prints the maze solved message
+*
+*/
+void print_solved(mazestruct_t *maze){
+	fprintf(maze->fp, "SOLVED THE MAZE in %d moves.\n", maze->move_count);
 }
