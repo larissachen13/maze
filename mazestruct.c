@@ -206,9 +206,9 @@ void maze_print(mazestruct_t *maze){
 				else if(maze->map[j][i]->dead){
 					printf(" D ");
 				}
-				else if(maze->map[j][i]->visited){
-					printf(" V ");
-				}
+				// else if(maze->map[j][i]->visited){
+				// 	printf(" V ");
+				// }
 				else{
 					printf("   ");
 				}
@@ -757,6 +757,13 @@ void delete_maze(mazestruct_t *maze){
 				free(maze->last_move[m]);
 			}
 		}
+
+		for(int n = 0; n < 10; n++){
+			if(maze->crossed_with[n] != NULL){
+				free(maze->crossed_with[n]);
+			}
+		}
+
 		
 		free(maze);
 	}
