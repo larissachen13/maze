@@ -1,9 +1,8 @@
 /*
  * avatar.h - header file for avatar.c
- * Name: Benjamin Littlejohn
+ *
+ * Benjamin Littlejohn, August 2016
  * Team: core_dumped_in_a_maze
- * Date: August 2016
- * Purpose: Module of cs50 X16 project Maze Challenge
  */
 
 /************* includes **************/
