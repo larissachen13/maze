@@ -46,6 +46,7 @@ typedef struct mazestruct{
 	avatar_move* last_move[10];
 	int leader_array[10];
 	int *crossed_with[10];
+	FILE* fp;
 } mazestruct_t;
 
 
@@ -57,7 +58,7 @@ typedef struct mazestruct{
 * Allocates memory for the maze structure and generates the 2d array of the grid spots.
 * returns a pointer the the new maze structure generated.
 */
-mazestruct_t* maze_new(int height, int width, int num_avatars){
+mazestruct_t* maze_new(int height, int width, int num_avatars, FILE* fp){
 
 	mazestruct_t *new_maze = malloc(sizeof(mazestruct_t));
 	if(new_maze == NULL){
@@ -121,6 +122,7 @@ mazestruct_t* maze_new(int height, int width, int num_avatars){
 	new_maze->num_avatars = num_avatars;
 	new_maze->move_count = 0;
 	new_maze->number_leaders = num_avatars;
+	new_maze->fp = fp;
 
 	//initialise the array for last moves
 	for (int i = 0; i < 10; i++){
@@ -206,9 +208,9 @@ void maze_print(mazestruct_t *maze){
 				else if(maze->map[j][i]->dead){
 					printf(" D ");
 				}
-				else if(maze->map[j][i]->visited){
-					printf(" V ");
-				}
+				// else if(maze->map[j][i]->visited){
+				// 	printf(" V ");
+				// }
 				else{
 					printf("   ");
 				}
@@ -323,6 +325,7 @@ void place_avatar(mazestruct_t *maze, int x, int y, int avatar_id){
 		//print the update
 		printf("\n********************************************************************************\n");
 		printf("Inserted avatar %d at %d,%d.\n", avatar_id, x, y);
+		fprintf(fp, "Inserted avatar %d at %d,%d.\n", avatar_id, x, y);
 		maze_print(maze);
 		printf("********************************************************************************\n");
 	}
@@ -357,6 +360,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted west wall at %d,%d.\n", x, y);
+			fprintf(maze->fp, "Ran into west wall at %d,%d.\n", x, y);
 		}
 	}
 	if(direction == 1){
@@ -367,6 +371,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted north wall at %d,%d.\n", x, y);
+			fprintf(maze->fp, "Ran into north wall at %d,%d.\n", x, y);
 		}
 	}
 	if(direction == 2){
@@ -377,6 +382,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted south wall at %d,%d.\n", x, y);
+			fprintf(maze->fp, "Ran into south wall at %d,%d.\n", x, y);
 		}
 	}
 	if(direction == 3){
@@ -387,6 +393,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction){
 		}
 		if(!maze->map[x][y]->dead){
 			printf("Inserted east wall at %d,%d.\n", x, y);
+			fprintf(maze->fp, "Ran into east wall at %d,%d.\n", x, y);
 		}
 	}
 
@@ -656,6 +663,7 @@ void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int 
 
 	printf("\n********************************************************************************\n");
 	printf("Moved avatar %d from %d,%d to %d,%d.\n", avatar_id, init_x, init_y, new_x, new_y);
+	fprintf(maze->fp, "Avatar %d moved from %d,%d to %d,%d.\n", avatar_id, init_x, init_y, new_x, new_y);
 	maze_print(maze);
 	printf("********************************************************************************\n");
 }
@@ -716,6 +724,12 @@ bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 	return false;
 }
 
+/**************** who_visited() ****************/
+/*
+* Returns the lowest numbered of id of the an avatar who's path is adjacent but 
+* has not crossed paths with the current avatar.
+* Returns -1 if no such avatar exist.
+*/
 int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id) {
 	int *my_crossed_with = maze->crossed_with[avatar_id];
 	for (int i = 0; i < maze->num_avatars; i++) {
@@ -757,6 +771,13 @@ void delete_maze(mazestruct_t *maze){
 				free(maze->last_move[m]);
 			}
 		}
+
+		for(int n = 0; n < 10; n++){
+			if(maze->crossed_with[n] != NULL){
+				free(maze->crossed_with[n]);
+			}
+		}
+
 		
 		free(maze);
 	}
@@ -864,13 +885,13 @@ int get_leader(mazestruct_t *maze, int avatar_id){
 }
 
 
-/**************** cross ****************/
+/**************** cross_paths() ****************/
 /*
-* Takes in the height and width of the maze and the number of avatars playing the game.
-* Allocates memory for the maze structure and generates the 2d array of the grid spots.
-* returns a pointer the the new maze structure generated.
+* Takes in the the ids of two avatars and marks that anyone the first avatar has crossed with,
+* the second has also crossed with and vice versa.
+* returns true if all avatars have crossed paths with each other, false otherwise.
 */
-bool cross_paths (int id1, int id2, mazestruct_t *maze) {
+bool cross_paths(int id1, int id2, mazestruct_t *maze) {
 	bool check_all_crossed = true;
 	int *id1_crossed_with = maze->crossed_with[id1];
 	int *id2_crossed_with = maze->crossed_with[id2];

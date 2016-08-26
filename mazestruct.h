@@ -28,7 +28,7 @@ typedef struct avatar_move {
 * Allocates memory for the maze structure and generates the 2d array of the grid spots.
 * returns a pointer the the new maze structure generated.
 */
-mazestruct_t* maze_new(int height, int width, int num_avatars);
+mazestruct_t* maze_new(int height, int width, int num_avatars, FILE *fp);
 
 /**************** maze_print() ****************/
 /*
@@ -188,7 +188,20 @@ int get_leader(mazestruct_t *maze, int avatar_id);
 */
 bool have_paths_crossed(mazestruct_t *maze);
 
+/**************** who_visited() ****************/
+/*
+* Returns the lowest numbered of id of the an avatar who's path is adjacent but 
+* has not crossed paths with the current avatar.
+* Returns -1 if no such avatar exist.
+*/
 int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id);
+
+/**************** cross_paths() ****************/
+/*
+* Takes in the the ids of two avatars and marks that anyone the first avatar has crossed with,
+* the second has also crossed with and vice versa.
+* returns true if all avatars have crossed paths with each other, false otherwise.
+*/
 bool cross_paths (int id1, int id2, mazestruct_t *maze);
 
 /****************** is_dead() ***********************/
