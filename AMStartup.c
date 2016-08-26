@@ -135,10 +135,6 @@ int main (int argc, char* argv[]) {
   void *thread_status;
   pthread_t avatars[AM_MAX_AVATAR];
   thread_data_t *params;
-
-  //thread for the maze gui
-  pthread_t maze_gui; 
-
   if (pthread_mutex_init(&my_turn, NULL) != 0) {
       perror("Mutex creation failed.\n");
       close(comm_sock);
@@ -165,15 +161,9 @@ int main (int argc, char* argv[]) {
         //return AVATAR_NOT_CREATED;
       }
     }
-
-      if (pthread_create(&maze_gui, NULL, maze_drawer, maze) != 0) {
-	  fprintf(stderr, "Thread for maze GUI could not be created.\n");
-      }
-
       for (int i = 0; i < n; i++) {
 	  pthread_join(avatars[i], &thread_status);
       }
-      pthread_join(maze_gui, NULL);
   }
 
   //check for return status from threads 
