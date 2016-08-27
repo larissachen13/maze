@@ -199,7 +199,7 @@ int main (int argc, char* argv[]) {
       }
     }
       for (int i = 0; i < n; i++) {
-	       pthread_join(avatars[i], &thread_status);
+	       pthread_join(avatars[i], thread_status);
       }
   }
 
@@ -246,9 +246,10 @@ int main (int argc, char* argv[]) {
 }
 
 /************ User-defined Functions ***************/
+
 /*
 * send_init_message: asks server to create maze with difficulty and n_avatars,
-* initializes maze-initialization message within function and writes it to server
+* sets up maze-initialization message and writes it to server
 *
 * @n_avatars: int representing number of avatars
 * @difficulty: difficulty of maze, must be an int
@@ -277,6 +278,15 @@ int send_init_message(int n_avatars, int difficulty, int comm_sock, struct socka
   return 0;
 }
 
+/*
+* recv_init_response: reads response from server which indicates maze dimensions
+* and which port the maze is set up on the server.
+*
+* @comm_sock
+* @init_response: pointer to store the response message in, allocated but empty
+*
+* Returns 0 on success otherwise returns error
+*/
 int recv_init_response(int comm_sock, AM_Message *init_response) {
   int bytes_read;
 
