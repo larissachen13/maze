@@ -157,13 +157,13 @@ int main (int argc, char* argv[]) {
   maze_width = ntohl(init_response.init_ok.MazeWidth);
   maze_height = ntohl(init_response.init_ok.MazeHeight);
 
-  // 5. Create log file
+  // 5. Create log file and print the first line 
   const int len = 400; // fix this
   char filename[len];
   snprintf(filename, len, "Amazing_%s_%d_%d.log", getenv("USER"), n, d);
   logfile = fopen(filename, "w");
   time(&date);
-  fprintf(logfile, "%s, 10829, %s*************************\n", getenv("USER"), ctime(&date));
+  fprintf(logfile, "%s, %d, %s*************************\n", getenv("USER"), maze_port,ctime(&date));
 
   // initialization before creating threads
   int kk = 1;
