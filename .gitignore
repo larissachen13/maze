@@ -5,7 +5,6 @@ AMStartupgtk
 AMStartupsleep
 gui/gui.a
 lib/lib.a
-Amazing*
 JaminDoodles
 vgcore.*
 .nfs*
