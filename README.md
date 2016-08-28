@@ -7,8 +7,10 @@ with a certain difficulty and number of avatars depending on user input. More
 specs about design can be found in the design.pdf file. 
 
 ## Usage 
-* **Compiling**: `make`  
-* **Running**: `AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `      
+* **Compile with ASCII representation**: `make`
+  **Compile with GTK representation**: `make GTK`
+* **Running**: `AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `
+* **Running with GTK**: `AMStartupgtk -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `
 * Example: running a maze with 2 avatars on diffuculty 3: `AMStartup -n 2 -d 3 -h flume.cs.dartmouth.edu`   
 * **Cleaning**:  `make clean`
 
@@ -59,6 +61,8 @@ Exit Statuses:
 ## Testing 
 Refer to `TESTING.md` for further testing instructions 
 
+## Known GTK Mem Leak 
+Arbitrarily there will be a mem leak of 1584 bytes due to bad GTK cleanup. We just want to point out that this is not due to our code 
 
 ## Setting up the Repo 
 create new repository:
