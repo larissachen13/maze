@@ -2,7 +2,7 @@
 
 ## Data Structures:    
        
-## Avatar Struct      
+## Avatar Struct: Holds move-making decisions for each avatar thread      
 ##### Important Members:      
 * id
 * (x, y) position 
@@ -18,7 +18,7 @@
 
 
          
-## Mazestruct         
+## Mazestruct : Holds representation and status of the maze and any other global variables pertinent to each thread          
 ##### Important Members:         
 * array of all the slots in the maze
 * height, width
