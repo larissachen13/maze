@@ -46,6 +46,7 @@ specs about design can be found in the design.pdf file.
  * Thick black lines: walls
 
 * **Logfile**
+  * Stored in results directory 
   * Result of each move 
   * Locations of each avatar 
   * If successful, prints success of message
@@ -81,6 +82,7 @@ Exit Statuses:
 * **lib**: *amazing.h* and our defined data structures *avatar.c*, *mazestruct.c*, with their corresponding .h files. 
 * **test_scripts**: holds testing scripts 
 * **gui**: holds module and program that draws the GTK maze interface 
+* **results**: results directory with log of successful runs, all runs with -n 5 with difficulty ranging from 0 to 9
 
 *see design.pdf for more info about each module* 
 
@@ -90,21 +92,3 @@ Refer to `TESTING.md` for further testing instructions
 ## Known GTK Mem Leak 
 Arbitrarily there will be a mem leak of 1584 bytes due to bad GTK cleanup. We just want to point out that this is not due to our code 
 
-## Setting up the Repo 
-create new repository:
-
-- git clone https://gitlab.cs.dartmouth.edu/benjihannam/maze.git
-- cd maze
-- touch README.md
-- git add README.md
-- git commit -m "add README"
-- git push -u origin master
-
-Existing folder or git repository:
-
-- git clone https://gitlab.cs.dartmouth.edu/benjihannam/maze.git
-- cd maze
-- touch README.md
-- git add README.md
-- git commit -m "add README"
-- git push -u origin master
