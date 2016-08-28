@@ -1,4 +1,4 @@
-/* 
+/*
  * mazestruct.h - header file for mazestruct
  *
  * Benji Hannam, July 2016
@@ -198,7 +198,7 @@ int who_visited(mazestruct_t *maze, int x, int y, int direction, int avatar_id);
 
 /**************** cross_paths() ****************/
 /*
-* Takes in the the ids of two avatars and marks that anyone the first avatar has crossed with,
+* Takes in the the ids of two avatars and marks that any avtar the first avatar has crossed paths with,
 * the second has also crossed with and vice versa.
 * returns true if all avatars have crossed paths with each other, false otherwise.
 */

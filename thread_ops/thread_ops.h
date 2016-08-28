@@ -1,5 +1,6 @@
 /*
 * thread_ops.h header file for the threads module
+* Threads module wraps all functionality of the avatar threads 
 *
 *
 * Larissa Chen, August 2016
@@ -17,17 +18,8 @@ typedef struct thread_data {
     int id;
     int maze_port;
     char *host_name;
-    int *return_status; 
+    int *return_status;
 } thread_data_t;
-
-/**************** generate_avatars ****************/
-/*
- * Entry point function in generating the appropriate number of avatars by
- * initiating each thread responsible for each avatars communication to the server
- * Returns AVATAR_NOT_CREATED if there was an error creating an avatar's thread
- * Returns SUCCESS if each avatar's thread is successfully created.
- */
-//int generate_avatars(int num_avatars, int maze_port, char *host_name);
 
 /**************** avatar_thread ****************/
 /*

@@ -1,5 +1,7 @@
 /*
  * avatar.h - header file for avatar.c
+ * defines methods for the Avatar struct
+ * holds all move-making logic
  *
  * Benjamin Littlejohn, August 2016
  * Team: core_dumped_in_a_maze
@@ -24,7 +26,7 @@
  *
  * Algorithm:
  * 	If there is a known route between all avatars...
- * 	Follow the route to bring all avatars together
+ *  have each avatar follow that route to bring all the avatars together. 
  *	If a path connecting all avatars is not yet discovered...
  * 	Run through all possible moves to see what priorities each satisfies
  * 	Choose the move that satisfies the highest priority
