@@ -956,13 +956,19 @@ bool cross_paths(int id1, int id2, mazestruct_t *maze) {
 	int *id1_crossed_with = maze->crossed_with[id1];
 	int *id2_crossed_with = maze->crossed_with[id2];
 
+	// OR the crossed_with arrays of each target avatar because any avatar A who
+	// crosses with avatar B who has also crossed with avatar C would mean each
+	// avatar A, B, C would contain crossed_with arrays of “A, B, C”.
 	if (id1_crossed_with != id2_crossed_with) {
 		for (int i = 0; i < maze->num_avatars; i++) {
+			// just update avatar1's crossed_with array
 			if (!(id1_crossed_with[i] = id1_crossed_with[i] || id2_crossed_with[i])) {
-				check_all_crossed = false;
+				check_all_crossed = false;	// while computing result array, check if all are crossed
 			}
 		}
+		// simply set avatar2's crossed_with array to point to the updated avatar1's
 		maze->crossed_with[id2] = maze->crossed_with[id1];
+		// dont forget about any other crossed_with paths that also point to avatar2 
 		for (int i = 0; i < maze->num_avatars; i++) {
 			if (maze->crossed_with[i] == id2_crossed_with) {
 				maze->crossed_with[i] = maze->crossed_with[id1];
@@ -1046,4 +1052,3 @@ int get_width(mazestruct_t *maze){
 bool has_avatar(mazestruct_t *maze, int x, int y){
 	return maze->map[x][y]->avatar;
 }
-

@@ -48,7 +48,6 @@ static void update_leader(mazestruct_t *maze, Avatar *avatar, XYPos old_pos,
  */
 void make_move(mazestruct_t *maze, Avatar *avatar, int comm_sock,
 	AM_Message *msg_buff) {
-		sleep(610);
     avatar_move *move;
 
     if ((move = malloc(sizeof(avatar_move))) == NULL) {

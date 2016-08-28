@@ -240,48 +240,60 @@ int main (int argc, char* argv[]) {
   // 9. Parse exit codes and exit
   switch(exit_code) {
      case 0 :
+        fprintf(logfile,"Exited with status 0, maze was solved\n");
         printf("Exited with status 0, maze was solved\n");
         exit(0);
         break;
      case 1 :
+        fprintf(logfile, "Exited with status 1, Server ran out of disk memory\n");
         printf("Exited with status 1, Server ran out of disk memory\n");
         exit(1);
         break;
      case 2 :
+      fprintf(logfile,"Exited with status 2, unclear error\n");
       printf("Exited with status 2, unclear error\n");
       exit(2);
       break;
      case 3 :
+      fprintf(logfile,"Exited with status 3, malloc error\n");
       printf("Exited with status 3, malloc error\n");
       exit(3);
       break;
      case 4 :
+      fprintf(logfile, "Exited with status 4, socket could not be created\n");
       printf("Exited with status 4, socket could not be created\n");
       exit(4);
       break;
      case 5 :
+      fprintf(logfile,"Exited with status 5, unknown hostname\n");
       printf("Exited with status 5, unknown hostname\n");
       exit(5);
       break;
      case 6 :
+      fprintf(logfile,"Exited with status 6, failed connected to socket\n"); 
       printf("Exited with status 6, failed connected to socket\n");
       exit(6);
       break;
      case 7 :
+      fprintf(logfile,"Exited with status 7, messaged failed to be written or read\n");
       printf("Exited with status 7, messaged failed to be written or read\n");
       exit (7);
       break;
      case 8 :
+      fprintf(logfile,"Exited with status 8, avatar could not be created\n");
       printf("Exited with status 8, avatar could not be created\n");
       exit(8);
       break;
     case AM_TOO_MANY_MOVES:
+      fprintf(logfile,"Exited with status 11, max number of moves exceeded\n");
       printf("Exited with status 11, max number of moves exceeded\n");
       exit(11);
     case AM_SERVER_TIMEOUT:
+      fprintf(logfile,"Exited with status 12, server has timed out or serve\n");
       printf("Exited with status 12, server has timed out or serve\n");
       exit(12);
      default :
+       fprintf(logfile, "Communication error with server\n");
        printf("Communication error with server\n");
   }
   exit(0);
