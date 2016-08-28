@@ -361,3 +361,4 @@ static void update_leader(mazestruct_t *maze, Avatar *avatar, XYPos old_pos,
     remove_leader(maze, avatar->fd);
     set_leader(maze, avatar->fd, avatar->leader);
 }
+

@@ -38,11 +38,11 @@ AMStartupgtk.o: ./thread_ops/thread_ops.h ./gui/mazedrawer.h
 	$(CC) $(GTKFLAGS) -c AMStartup.c -o $@
 
 # build the library
-./lib/lib.a: 
+./lib/lib.a: ./lib/avatar.c ./lib/mazestruct.c
 	cd ./lib; $(MAKE)
 
 #build the gui library
-./gui/gui.a: 
+./gui/gui.a: ./gui/mazedrawer.c
 	cd ./gui; $(MAKE)
 
 .PHONY: clean
