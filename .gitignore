@@ -1,6 +1,9 @@
 core.*
 *.o
 AMStartup
+AMStartupgtk
+gui/gui.a
+lib/lib.a
 Amazing*
 JaminDoodles
 vgcore.*
