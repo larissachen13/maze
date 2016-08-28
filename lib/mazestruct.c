@@ -374,7 +374,7 @@ int is_someone_here(mazestruct_t *maze, int x, int y, int id){
 void print_locations(mazestruct_t *maze){
 	fprintf(maze->fp, "Avatar locations: ");
 
-	for(int x = 0; x < maze->height; x++){
+	for(int x = 0; x < maze->width; x++){
 		for(int y = 0; y < maze->height; y++){
 
 			if(maze->map[x][y]->avatar){
@@ -1029,6 +1029,15 @@ void print_solved(mazestruct_t *maze){
 */
 int get_height(mazestruct_t *maze){
 	return maze->height;
+}
+
+/**************** get_width() ****************/
+/*
+* Returns the width of the maze
+*
+*/
+int get_width(mazestruct_t *maze){
+	return maze->width;
 }
 
 /**************** has_avatar() ****************/
