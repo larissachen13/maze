@@ -8,7 +8,7 @@ specs about design can be found in the design.pdf file.
 
 ## Usage 
 * **Compile with ASCII representation**: `make`    
-  **Compile with GTK representation**: `make GTK`
+  **Compile with GTK representation**: `make AMStartupgtk`
 * **Running**: `AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `
 * **Running with GTK**: `AMStartupgtk -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `
 * Example: running a maze with 2 avatars on diffuculty 3: `AMStartup -n 2 -d 3 -h flume.cs.dartmouth.edu`   
@@ -30,24 +30,27 @@ specs about design can be found in the design.pdf file.
 * Any other options included will return an error, and exit with status of 10 
 
 ## Outputs 
-* *Maze GUI ASCII* 
+* **Maze GUI ASCII** 
  * Lines: walls 
  * +: corners of each spot 
  * number: avatar id (if two are on the same spot, the lower id is shown)
  * D: dead spot 
  
 
-* *Maze GUI GTK* (if compiled and ran with gtk option)  
+* **Maze GUI GTK** (if compiled and ran with gtk option)  
  * Blue: unvisited nodes 
  * Red: avatars 
  * Black: Backtraced, dead paths 
  * Thick black lines: walls
 
-* *Logfile*
+* **Logfile**
   * Result of each move 
   * Locations of each avatar 
   * If successful, prints success of message
   * If not successful does not print the specific reason why, check stdout and exit code 
+* **Exit Code**
+  * If maze is successfully solved, threads will return an exit code of 0 and main will successfully exit with 0 
+  * If any other error is encountered, threads will return with the appropriate exit code and main will parse it print a message and exit with that code 
  
  
 ## Exit Statuses 
