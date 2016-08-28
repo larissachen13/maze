@@ -15,3 +15,6 @@ Now able to run scripts at root-level of directory with....
 3. `./test_scripts/test_gtk.sh`
  * Tests the gui GTK representation on mazes: 
   * -n 7 -d 5
+
+4. `./test_scripts/populate_results.sh`
+ * populates the result directory with logfiles of running the maze w/ -n 5 and -d 0 through 9 
