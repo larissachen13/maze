@@ -858,7 +858,7 @@ int get_number_leaders(mazestruct_t *maze){
 		return maze->number_leaders;
 	}
 	else{
-		return NULL;
+		return -1;
 	}
 }
 
@@ -967,3 +967,22 @@ void print_solved(mazestruct_t *maze){
 		fprintf(maze->fp, "SOLVED THE MAZE in %d moves.\n", maze->move_count);
 	}
 }
+
+/**************** get_height() ****************/
+/*
+* Returns the height of the maze
+*
+*/
+int get_height(mazestruct_t *maze){
+	return maze->height;
+}
+
+/**************** has_avatar() ****************/
+/*
+* Returns if a spot has an avatar
+*
+*/
+bool has_avatar(mazestruct_t *maze, int x, int y){
+	return maze->map[x][y]->avatar;
+}
+
