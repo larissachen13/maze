@@ -10,10 +10,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include "../lib/mazestruct.h"
 
 #define WINDOW_WIDTH 830
 #define WINDOW_HEIGHT 830
+
+//global variables
+extern pthread_mutex_t my_turn;
 
 //function protoypes prototype
 void* maze_drawer(void *maze_in);
@@ -85,7 +89,7 @@ gboolean time_handler(GtkWidget *widget) {
 * returns false when done.
 */
 gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data) {
-
+  pthread_mutex_lock(&my_turn);
   cairo_t *cr;
   mazestruct_t *maze = data;
   int height = get_height(maze);
@@ -144,6 +148,7 @@ gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data
   }
 
   cairo_destroy(cr);
+  pthread_mutex_unlock(&my_turn);
 
   return false;
 }
