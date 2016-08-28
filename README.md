@@ -7,22 +7,22 @@ with a certain difficulty and number of avatars depending on user input. More
 specs about design can be found in the design.pdf file. 
 
 ## Usage 
-* Compiling: `make`  
-* Running: `AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `      
+* **Compiling**: `make`  
+* **Running**: `AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `      
 * Example: running a maze with 2 avatars on diffuculty 3: `AMStartup -n 2 -d 3 -h flume.cs.dartmouth.edu`   
-* Cleaning:  `make clean`
+* **Cleaning**:  `make clean`
 
 
 ## Inputs 
 `AMStartup -n [numberOfAvatars] -d [difficultyMaze] -h [hostname] `    
 
-* -n numberOfAvatars - number of avatars to place in maze
+* **-n numberOfAvatars** - number of avatars to place in maze
  * must be an int
  * must lie in range specified at server with hostname (in case of flume.cs.dartmouth.edu: 1 <= numberOfAvatars <= 10
-* -d difficultyMaze - difficulty of the maze
+* **-d difficultyMaze** - difficulty of the maze
  * must be an int 
  * must lie in range specified at server with hostname (in case of flume.cs.dartmouth.edu: 0 <= difficultyMaze <= 9
-* -h hostname
+* **-h hostname**
  * should be flume.cs.dartmouth.edu
  * any other hostname that we cannot connect to will return an error 
 * Any other options included will return an error, and exit with status of 10 
