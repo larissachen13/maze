@@ -310,6 +310,89 @@ void maze_print(mazestruct_t *maze){
 	printf("Number of leaders: %d\n", maze->number_leaders);
 }
 
+/**************** did_x_visit() ****************/
+/*
+* Checks if a spot denoted by a direction has been
+* Takes in the maze struct, x,y coordinates, the direction and an avatar id as parameters.
+* returns true if the avatar has visited it otherwise returns false.
+*/
+bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id){
+	//west spot
+	if(direction == 0 && x > 0){
+		return (maze->map[x - 1][y]->visited_by[avatar_id] == 1);
+	}
+	//east spot
+	else if(direction == 3 && (x < (maze->width - 1))){
+		return (maze->map[x + 1][y]->visited_by[avatar_id] == 1);
+	}
+	//north spot
+	else if(direction == 1 && (y > 0)){
+		return (maze->map[x][y - 1]->visited_by[avatar_id] == 1);
+	}
+	//south spot
+	else if(direction == 2 && (y < maze->height - 1)){
+		return (maze->map[x][y + 1]->visited_by[avatar_id] == 1);
+	}
+	//check the current spot
+	else if(direction == -1){
+		return (maze->map[x][y]->visited_by[avatar_id] == 1);
+	}
+	//if we make it down here
+	return false;
+}
+
+/**************** is_someone_here() ****************/
+/*
+* Checks if there is an avatar other than the one with the given id at the
+* 	current spot dictated by x and y.
+* Takes in the maze struct, x,y coordinates and the id of the avatar checking
+* 	if another avatar is present.
+* Returns the lowest avatar id if another avatar is on the spot
+* 	and -1 if none is found.
+*/
+int is_someone_here(mazestruct_t *maze, int x, int y, int id){
+	//check coords
+	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
+		printf("Coordinates are out of range\n");
+		return -1;
+	}
+	else {
+	    for(int i = 0; i < maze->num_avatars; i++){
+		if (i != id && maze->map[x][y]->avatar_number[i] == 1){
+		    return i;
+		}
+	    }
+	    return -1;
+	}
+}
+
+/**************** print_locations() ****************/
+/*
+* prints the locations of each avatar in the form avatar_id: (x, y);
+*
+*/
+void print_locations(mazestruct_t *maze){
+	fprintf(maze->fp, "Avatar locations: ");
+
+	for(int x = 0; x < maze->height; x++){
+		for(int y = 0; y < maze->height; y++){
+
+			if(maze->map[x][y]->avatar){
+
+				for(int i = 0; i < maze->num_avatars; i++){
+
+					if(maze->map[x][y]->avatar_number[i] == 1){
+						fprintf(maze->fp, "%d: (%d, %d); ", i, x, y);
+					}
+				}
+			}
+		}
+	}
+
+	fprintf(maze->fp, "\n");
+
+}
+
 /**************** place_avatar() ****************/
 /*
 * Takes in a pointer to a maze struct, a pair of x,y coords and the id of the avatar.
@@ -328,6 +411,7 @@ void place_avatar(mazestruct_t *maze, int x, int y, int avatar_id){
 		printf("\n********************************************************************************\n");
 		printf("Inserted avatar %d at %d,%d.\n", avatar_id, x, y);
 		fprintf(maze->fp, "Inserted avatar %d at %d,%d.\n", avatar_id, x, y);
+		print_locations(maze);
 		maze_print(maze);
 		printf("********************************************************************************\n");
 	}
@@ -363,6 +447,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 		if(!maze->map[x][y]->dead){
 			printf("Inserted west wall at %d,%d.\n", x, y);
 			fprintf(maze->fp, "Avatar %d ran into west wall at %d,%d.\n", avatar_id, x, y);
+			print_locations(maze);
 		}
 	}
 	if(direction == 1){
@@ -374,6 +459,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 		if(!maze->map[x][y]->dead){
 			printf("Inserted north wall at %d,%d.\n", x, y);
 			fprintf(maze->fp, "Avatar %d ran into north wall at %d,%d.\n", avatar_id, x, y);
+			print_locations(maze);
 		}
 	}
 	if(direction == 2){
@@ -385,6 +471,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 		if(!maze->map[x][y]->dead){
 			printf("Inserted south wall at %d,%d.\n", x, y);
 			fprintf(maze->fp, "Avatar %d ran into south wall at %d,%d.\n", avatar_id, x, y);
+			print_locations(maze);
 		}
 	}
 	if(direction == 3){
@@ -396,6 +483,7 @@ void insert_wall(mazestruct_t *maze, int x, int y, int direction, int avatar_id)
 		if(!maze->map[x][y]->dead){
 			printf("Inserted east wall at %d,%d.\n", x, y);
 			fprintf(maze->fp, "Avatar %d ran into east wall at %d,%d.\n", avatar_id, x, y);
+			print_locations(maze);
 		}
 	}
 
@@ -544,6 +632,7 @@ bool check_wall(mazestruct_t *maze, int x, int y, int direction){
 	}
 
 }
+
 /**************** is_someone_adjacent() ****************/
 /*
 * Checks if there is someone the adjacent spot dictated by the inputted direction.
@@ -598,33 +687,16 @@ int is_someone_adjacent(mazestruct_t *maze, int x, int y, int direction){
 		}
 		return -1;
 	}
+	else if(direction == -1){
+		for(int i = 0; i < maze->num_avatars; i++){
+			 if (maze->map[x][y]->avatar_number[i] == 1){
+			 	return i;
+			 }
+		}
+		return -1;
+	}
 	else{
 		return -1;
-	}
-}
-
-/**************** is_someone_here() ****************/
-/*
-* Checks if there is an avatar other than the one with the given id at the
-* 	current spot dictated by x and y.
-* Takes in the maze struct, x,y coordinates and the id of the avatar checking
-* 	if another avatar is present.
-* Returns the lowest avatar id if another avatar is on the spot
-* 	and -1 if none is found.
-*/
-int is_someone_here(mazestruct_t *maze, int x, int y, int id){
-	//check coords
-	if(x > (maze->width - 1) || y > (maze->height - 1) || x < 0 || y < 0){
-		printf("Coordinates are out of range\n");
-		return -1;
-	}
-	else {
-	    for(int i = 0; i < maze->num_avatars; i++){
-		if (i != id && maze->map[x][y]->avatar_number[i] == 1){
-		    return i;
-		}
-	    }
-	    return -1;
 	}
 }
 
@@ -669,6 +741,7 @@ void update_location(mazestruct_t *maze, int init_x, int init_y, int new_x, int 
 	printf("\n********************************************************************************\n");
 	printf("Moved avatar %d from %d,%d to %d,%d.\n", avatar_id, init_x, init_y, new_x, new_y);
 	fprintf(maze->fp, "Avatar %d moved from %d,%d to %d,%d.\n", avatar_id, init_x, init_y, new_x, new_y);
+	print_locations(maze);
 	maze_print(maze);
 	printf("********************************************************************************\n");
 }
@@ -706,32 +779,6 @@ bool is_visited(mazestruct_t *maze, int x, int y, int direction){
 
 }
 
-/**************** did_x_visit() ****************/
-/*
-* Checks if a spot denoted by a direction has been
-* Takes in the maze struct, x,y coordinates, the direction and an avatar id as parameters.
-* returns true if the avatar has visited it otherwise returns false.
-*/
-bool did_x_visit(mazestruct_t *maze, int x, int y, int direction, int avatar_id){
-	//west spot
-	if(direction == 0 && x > 0){
-		return (maze->map[x - 1][y]->visited_by[avatar_id] == 1);
-	}
-	//east spot
-	else if(direction == 3 && (x < (maze->width - 1))){
-		return (maze->map[x + 1][y]->visited_by[avatar_id] == 1);
-	}
-	//north spot
-	else if(direction == 1 && (y > 0)){
-		return (maze->map[x][y - 1]->visited_by[avatar_id] == 1);
-	}
-	//south spot
-	else if(direction == 2 && (y < maze->height - 1)){
-		return (maze->map[x][y + 1]->visited_by[avatar_id] == 1);
-	}
-	//if we make it down here
-	return false;
-}
 
 /**************** who_visited() ****************/
 /*
