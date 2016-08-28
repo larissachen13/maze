@@ -7,7 +7,7 @@ with a certain difficulty and number of avatars depending on user input. More
 specs about design can be found in the design.pdf file. 
 
 ## Usage 
-* **Compile with ASCII representation**: `make`
+* **Compile with ASCII representation**: `make`    
   **Compile with GTK representation**: `make GTK`
 * **Running**: `AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `
 * **Running with GTK**: `AMStartupgtk -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `
