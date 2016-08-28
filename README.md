@@ -46,8 +46,10 @@ Exit Statuses:
 
 
 ## File Structure
-* **AMStartup**: main entry point   
-* **thread_ops**: thread_ops module called by AMStartup and uses our data structs in lib.  
+* **AMStartup**: main entry point
+ * parses user inputs, asks server to create maze on a new port, and then starts the correct number of avatar threads 
+* **thread_ops**: thread_ops module called by AMStartup and uses our data structs in lib
+ * contains the avatar thread functionality 
 * **lib**: *amazing.h* and our defined data structures *avatar.c*, *mazestruct.c*, with their corresponding .h files. 
 
 *see design.pdf for more info about each module* 
