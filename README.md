@@ -22,6 +22,10 @@ specs about design can be found in the design.pdf file.
 * -d difficultyMaze - difficulty of the maze
  * must be an int 
  * must lie in range specified at server with hostname (in case of flume.cs.dartmouth.edu: 0 <= difficultyMaze <= 9
+* -h hostname
+ * should be flume.cs.dartmouth.edu
+ * any other hostname that we cannot connect to will return an error 
+* Any other options included will return an error, and exit with status of 10 
 
 ## Exit Statuses 
 Exit Statuses:     
@@ -42,12 +46,17 @@ Exit Statuses:
 
 
 ## File Structure
-* **AMStartup**: main entry point   
-* **thread_ops**: thread_ops module called by AMStartup and uses our data structs in lib.  
+* **AMStartup**: main entry point
+ * parses user inputs, asks server to create maze on a new port, and then starts the correct number of avatar threads 
+* **thread_ops**: thread_ops module called by AMStartup and uses our data structs in lib
+ * contains the avatar thread functionality 
 * **lib**: *amazing.h* and our defined data structures *avatar.c*, *mazestruct.c*, with their corresponding .h files. 
 
 *see design.pdf for more info about each module* 
 
+
+
+## Setting up the Repo 
 create new repository:
 
 - git clone https://gitlab.cs.dartmouth.edu/benjihannam/maze.git
