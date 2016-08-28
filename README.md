@@ -82,7 +82,7 @@ Exit Statuses:
 * **lib**: *amazing.h* and our defined data structures *avatar.c*, *mazestruct.c*, with their corresponding .h files. 
 * **test_scripts**: holds testing scripts 
 * **gui**: holds module and program that draws the GTK maze interface 
-* **results**: results directory with log of successful runs, all runs with -n 5 with difficulty ranging from 0 to 9
+* **results**: results directory with log of successful runs, all runs with -n 4 with difficulty ranging from 0 to 9
 
 *see design.pdf for more info about each module* 
 
