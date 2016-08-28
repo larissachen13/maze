@@ -8,7 +8,7 @@ specs about design can be found in the design.pdf file.
 
 ## Usage 
 * **Compile with ASCII representation**: `make`    
-  **Compile with GTK representation**: `make GTK`
+  **Compile with GTK representation**: `make AMStartupgtk`
 * **Running**: `AMStartup -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `
 * **Running with GTK**: `AMStartupgtk -n [numberOfAvatars] -d [difficultMaze] -h [hostname] `
 * Example: running a maze with 2 avatars on diffuculty 3: `AMStartup -n 2 -d 3 -h flume.cs.dartmouth.edu`   
