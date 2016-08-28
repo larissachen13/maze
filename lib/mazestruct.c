@@ -459,6 +459,9 @@ bool is_dead(mazestruct_t *maze, int x, int y, int direction) {
 
 		return maze->map[x+1][y]->dead;
 	}
+	else if(direction == -1){
+		return maze->map[x][y]->dead;
+	}
 	else{
 		return false;
 	}
@@ -692,6 +695,10 @@ bool is_visited(mazestruct_t *maze, int x, int y, int direction){
 	//south spot
 	else if(direction == 2 && (y < maze->height - 1)){
 		return maze->map[x][y + 1]->visited;
+	}
+	//own spot
+	else if(direction == -1){
+		return maze->map[x][y]->visited;
 	}
 	else{
 		return false;
