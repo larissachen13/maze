@@ -17,4 +17,4 @@ Now able to run scripts at root-level of directory with....
   * -n 7 -d 5
 
 4. `./test_scripts/populate_results.sh`
- * populates the result directory with logfiles of running the maze w/ -n 5 and -d 0 through 9 
+ * populates the result directory with logfiles of running the maze w/ -n 4 and -d 0 through 9 
