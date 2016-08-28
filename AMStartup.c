@@ -167,7 +167,7 @@ int main (int argc, char* argv[]) {
   // 5. Create log file and print the first line
   const int len = 400; // fix this
   char filename[len];
-  snprintf(filename, len, "Amazing_%s_%d_%d.log", getenv("USER"), n, d);
+  snprintf(filename, len, "./results/Amazing_%s_%d_%d.log", getenv("USER"), n, d);
   logfile = fopen(filename, "w");
   time(&date);
   fprintf(logfile, "%s, %d, %s*************************\n", getenv("USER"), maze_port,ctime(&date));
@@ -367,7 +367,7 @@ int recv_init_response(int comm_sock, AM_Message *init_response) {
     if (IS_AM_ERROR(ntohl(init_response->type))) {
       int error = ntohl(init_response->init_failed.ErrNum);
       if (error == AM_INIT_TOO_MANY_AVATARS) {
-        printf("Usage Error: Too many avatars specified as arugment\n");
+        printf("Usage Error: Avatar argument needs to be between 1 and 10 inclusive \n");
       }
       if (error == AM_INIT_BAD_DIFFICULTY) {
         printf("Usage Error: Difficulty argument needs to be between 0 and 9 inclusive\n");
