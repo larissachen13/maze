@@ -37,6 +37,7 @@
 #include <time.h>
 #include "lib/amazing.h"
 #include "thread_ops/thread_ops.h"
+#include "gui/mazedrawer.h"
 
 /******************** function prototypes ******************/
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server);
@@ -170,6 +171,7 @@ int main (int argc, char* argv[]) {
 
   // initialization before creating threads
   pthread_t avatars[AM_MAX_AVATAR];
+  pthread_t gui;
   thread_data_t *params[n];
   if (pthread_mutex_init(&my_turn, NULL) != 0) {
       perror("Mutex creation failed.\n");
@@ -184,7 +186,14 @@ int main (int argc, char* argv[]) {
   }
   else {
 
-// 6. Start the avatar threads
+// 6.1 Create the gui thread
+      if (pthread_create(&gui, NULL, maze_drawer, maze) != 0) {
+         fprintf(stderr, "Thread for gui could not be created.\n");
+         exit(7);
+      }
+      sleep(5);
+
+// 6.2 Start the avatar threads
     for (int i = 0; i < n; i++) {
 
     // generate params to pass into each thread
@@ -194,15 +203,17 @@ int main (int argc, char* argv[]) {
       params[i]->id = i;
       params[i]->return_status =malloc(sizeof(int));
 
-  // 7. Pass control to thread_ops module through function avatar_thread
+
+  // 7 Pass control to thread_ops module through function avatar_thread
       if (pthread_create(&avatars[i], NULL, avatar_thread, params[i]) != 0) {
-	       fprintf(stderr, "Thread for avatar %d could not be created.\n", i);
+         fprintf(stderr, "Thread for avatar %d could not be created.\n", i);
          exit(7);
       }
     }
       for (int i = 0; i < n; i++) {
-	       pthread_join(avatars[i], NULL);
+         pthread_join(avatars[i], NULL);
       }
+      pthread_join(gui, NULL);
   }
 
   int exit_code;

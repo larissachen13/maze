@@ -225,6 +225,13 @@ void print_solved(mazestruct_t *maze);
 */
 int get_height(mazestruct_t *maze);
 
+/**************** get_width() ****************/
+/*
+* Returns the width of the maze
+*
+*/
+int get_width(mazestruct_t *maze);
+
 /**************** has_avatar() ****************/
 /*
 * Returns if a spot has an avatar

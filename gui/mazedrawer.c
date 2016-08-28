@@ -56,7 +56,7 @@ void* maze_drawer(void *maze_in){
   gtk_window_set_title(GTK_WINDOW(window), "Maze Drawer");
 
   //add the loop to draw every set amount of time
-  g_timeout_add(10, (GSourceFunc) time_handler, (gpointer) window);
+  g_timeout_add(166, (GSourceFunc) time_handler, (gpointer) window);
   gtk_widget_show_all(window);
   time_handler(window);
 
@@ -93,19 +93,17 @@ gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data
   cairo_t *cr;
   mazestruct_t *maze = data;
   int height = get_height(maze);
+  int width = get_width(maze);
 
   cr = gdk_cairo_create(widget->window);
 
   int spot_height = 800/height;
   int indent = (WINDOW_HEIGHT - (height * spot_height))/2;
-  for (int i = 0; i < height; i++){
+  for (int i = 0; i < width; i++){
     for (int j = 0; j < height; j++){
 
       //set the color and draw the grids
-      if(has_avatar(maze, i, j)){
-        cairo_set_source_rgb(cr, 1, 0, 0);
-      }
-      else if(is_dead(maze, i, j, -1)){
+      if(is_dead(maze, i, j, -1)){
         cairo_set_source_rgb(cr, 0, 0, 0);
       }
       else if(is_visited(maze, i, j, -1)){
@@ -117,31 +115,37 @@ gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data
       cairo_rectangle(cr, i*spot_height + 1 + indent, j*spot_height + 1 + indent, spot_height - 1, spot_height -1);
       cairo_fill(cr);
 
+      if(has_avatar(maze, i, j)){
+        cairo_set_source_rgb(cr, 1, 0, 0);
+        cairo_rectangle(cr, i*spot_height + 6 + indent, j*spot_height + 6 + indent, spot_height - 10, spot_height - 10);
+        cairo_fill(cr);
+      }
+
       //set the color to black and draw west walls
       if(check_wall(maze, i, j, 0)){
         cairo_set_source_rgb(cr, 0, 0, 0);
-        cairo_rectangle(cr, i*spot_height + indent, j*spot_height + indent, 2, spot_height +1);
+        cairo_rectangle(cr, i*spot_height + indent - 1, j*spot_height + indent, 3, spot_height +1);
         cairo_fill(cr);
       }
 
       //set the color to black and draw north walls
       if(check_wall(maze, i, j, 1)){
         cairo_set_source_rgb(cr, 0, 0, 0);
-        cairo_rectangle(cr, i*spot_height + indent, j*spot_height + indent, spot_height +1, 2);
+        cairo_rectangle(cr, i*spot_height + indent, j*spot_height + indent - 1, spot_height +1, 3);
         cairo_fill(cr);
       }
 
       //draw a south wall
       if(check_wall(maze, i, j, 2)){
         cairo_set_source_rgb(cr, 0, 0, 0);
-        cairo_rectangle(cr, i*spot_height + indent, (j+1)*spot_height + indent, spot_height+1, 2);
+        cairo_rectangle(cr, i*spot_height + indent, (j+1)*spot_height + indent - 1, spot_height+1, 3);
         cairo_fill(cr);
       }
 
       //set the color to black and draw east walls
       if(check_wall(maze, i, j, 3)){
         cairo_set_source_rgb(cr, 0, 0, 0);
-        cairo_rectangle(cr, (i+1)*spot_height + indent, j*spot_height + indent, 2, spot_height+1);
+        cairo_rectangle(cr, (i+1)*spot_height + indent - 1 , j*spot_height + indent, 3, spot_height+1);
         cairo_fill(cr);
       }
     }

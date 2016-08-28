@@ -23,4 +23,4 @@ int main(int argc, char *argv[]){
 
 }
 
-//gcc mazetester.c -o mazetester ../lib/mazestruct.c mazedrawer.c `pkg-config --cflags --libs gtk+-2.0`
+//gcc mazetester.c -o mazetester ../lib/mazestruct.c mazedrawer.c `pkg-config --cflags --libs gtk+-2.0` -lpthread
