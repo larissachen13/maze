@@ -29,6 +29,27 @@ specs about design can be found in the design.pdf file.
  * any other hostname that we cannot connect to will return an error 
 * Any other options included will return an error, and exit with status of 10 
 
+## Outputs 
+* Maze GUI ASCII 
+ * Lines: walls 
+ * +: corners of each spot 
+ * number: avatar id (if two are on the same spot, the lower id is shown)
+ * D: dead spot 
+ 
+
+* Maze GUI GTK (if compiled and ran with gtk option)  
+ * Blue: unvisited nodes 
+ * Red: avatars 
+ * Black: Backtraced, dead paths 
+ * Thick black lines: walls
+
+* Logfile
+  * Result of each move 
+  * Locations of each avatar 
+  * If successful, prints success of message
+  * If not successful does not print the specific reason why, check stdout and exit code 
+ 
+ 
 ## Exit Statuses 
 Exit Statuses:     
 
