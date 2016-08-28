@@ -182,12 +182,9 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 	//update avatar position based on response
 	my_avatar->pos.x = ntohl(msg_buff->avatar_turn.Pos[my_avatar->fd].x);
 	my_avatar->pos.y = ntohl(msg_buff->avatar_turn.Pos[my_avatar->fd].y);
-	//printf("Avatar %d's new position is (%d, %d).\n", my_avatar->fd,
-		//my_avatar->pos.x, my_avatar->pos.y);
 	pthread_mutex_lock(&my_turn);
 	place_avatar(maze, my_avatar->pos.x, my_avatar->pos.y, my_avatar->fd);
 	pthread_mutex_unlock(&my_turn);
-	//printf("It's your turn %d\n", ntohl(msg_buff->avatar_turn.TurnId));
     }
     else {
         printf("Message type is: %d\n", ntohl(msg_buff->type));
@@ -197,7 +194,6 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     while (ntohl(msg_buff->type) == AM_AVATAR_TURN) {
 	//if it is your turn...
 	if (ntohl(msg_buff->avatar_turn.TurnId) == my_avatar->fd) {
-	    //printf("Avatar %d is taking its turn.\n", my_avatar->fd);
 	    pthread_mutex_lock(&my_turn); //make sure no one else can go
 	    make_move(maze, my_avatar, comm_sock, msg_buff);
 	    pthread_mutex_unlock(&my_turn); //allow next person to go
@@ -210,17 +206,20 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
     // once loop is ended, either maze has been solved or an error occured
     switch (ntohl(msg_buff->type)) {
 	case (AM_MAZE_SOLVED):
-		print_solved(maze);
-	    printf("The maze was solved!!!!\n");
+	    print_solved(maze);
 	    ret_status = SUCCESS;
+	    break;
+	case (AM_TOO_MANY_MOVES):
+	    ret_status = AM_TOO_MANY_MOVES;
+	    break;
+	case (AM_SERVER_TIMEOUT):
+	    ret_status = AM_SERVER_TIMEOUT;
 	    break;
 	default:
 	    if (IS_AM_ERROR(ntohl(msg_buff->type))) {
-		fprintf(stderr, "Error %d.\n", msg_buff->type);
 		ret_status = FAILED;
 	    }
 	    else {
-		perror("Who knows what happened.\n");
 		ret_status = UNCLEAR;
 	    }
     }

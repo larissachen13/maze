@@ -9,7 +9,15 @@
 
 int main(int argc, char *argv[]){
 
-	mazestruct_t *maze = maze_new(50, 50, 4, NULL);
+	FILE * fp = fopen("testfile", "w");
+	if (fp == NULL){
+		exit(1);
+	}
+	mazestruct_t *maze = maze_new(50, 50, 4, fp);
+	place_avatar(maze, 5, 5, 0);
+	insert_dead_spot(maze, 10, 10, 0);
+	update_location(maze, 5,5,5,6, 0);
+	insert_wall(maze, 5, 5, 1, 0);
 
 	maze_drawer(maze);
 

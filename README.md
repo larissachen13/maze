@@ -37,6 +37,8 @@ Exit Statuses:
 * 8 - invalid number of avatars 
 * 9 - invalid difficulty number 
 * 10 - missing argument or invalid option argument
+* 11 - maximum number of moves is exceeded
+* 12 - server times out 
 
 
 ## File Structure

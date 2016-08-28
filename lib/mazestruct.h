@@ -232,4 +232,12 @@ int get_height(mazestruct_t *maze);
 */
 bool has_avatar(mazestruct_t *maze, int x, int y);
 
+/**************** print_locations() ****************/
+/*
+* prints the locations of each avatar in the form avatar_id: (x, y);
+*
+*/
+void print_locations(mazestruct_t *maze);
+
+
 #endif
