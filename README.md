@@ -51,9 +51,13 @@ Exit Statuses:
 * **thread_ops**: thread_ops module called by AMStartup and uses our data structs in lib
  * contains the avatar thread functionality 
 * **lib**: *amazing.h* and our defined data structures *avatar.c*, *mazestruct.c*, with their corresponding .h files. 
+* **test_scripts**: holds testing scripts 
+* **gui**: holds module and program that draws the GTK maze interface 
 
 *see design.pdf for more info about each module* 
 
+## Testing 
+Refer to `TESTING.md` for further testing instructions 
 
 
 ## Setting up the Repo 
