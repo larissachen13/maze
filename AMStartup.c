@@ -45,7 +45,7 @@
 /******************** function prototypes ******************/
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server);
 int recv_init_response(int comm_sock, AM_Message *init_response);
-void clean_up(FILE *logfile, int comm_sock, thread_data_t **params, int num_avatars);
+void clean_up(int comm_sock, thread_data_t **params, int num_avatars);
 
 /******************** global variables **********************/
 mazestruct_t *maze;
@@ -235,66 +235,78 @@ int main (int argc, char* argv[]) {
   }
 
   // 8. Clean up
-  clean_up(logfile, comm_sock, params, n);
+  clean_up(comm_sock, params, n);
 
   // 9. Parse exit codes and exit
   switch(exit_code) {
      case 0 :
         fprintf(logfile,"Exited with status 0, maze was solved\n");
         printf("Exited with status 0, maze was solved\n");
+        fclose(logfile);
         exit(0);
         break;
      case 1 :
         fprintf(logfile, "Exited with status 1, Server ran out of disk memory\n");
         printf("Exited with status 1, Server ran out of disk memory\n");
+        fclose(logfile);
         exit(1);
         break;
      case 2 :
       fprintf(logfile,"Exited with status 2, unclear error\n");
       printf("Exited with status 2, unclear error\n");
+      fclose(logfile);
       exit(2);
       break;
      case 3 :
       fprintf(logfile,"Exited with status 3, malloc error\n");
       printf("Exited with status 3, malloc error\n");
+      fclose(logfile);
       exit(3);
       break;
      case 4 :
       fprintf(logfile, "Exited with status 4, socket could not be created\n");
       printf("Exited with status 4, socket could not be created\n");
+      fclose(logfile);
       exit(4);
       break;
      case 5 :
       fprintf(logfile,"Exited with status 5, unknown hostname\n");
       printf("Exited with status 5, unknown hostname\n");
+      fclose(logfile);
       exit(5);
       break;
      case 6 :
-      fprintf(logfile,"Exited with status 6, failed connected to socket\n"); 
+      fprintf(logfile,"Exited with status 6, failed connected to socket\n");
       printf("Exited with status 6, failed connected to socket\n");
+      fclose(logfile);
       exit(6);
       break;
      case 7 :
       fprintf(logfile,"Exited with status 7, messaged failed to be written or read\n");
       printf("Exited with status 7, messaged failed to be written or read\n");
+      fclose(logfile);
       exit (7);
       break;
      case 8 :
       fprintf(logfile,"Exited with status 8, avatar could not be created\n");
       printf("Exited with status 8, avatar could not be created\n");
+      fclose(logfile);
       exit(8);
       break;
     case AM_TOO_MANY_MOVES:
       fprintf(logfile,"Exited with status 11, max number of moves exceeded\n");
       printf("Exited with status 11, max number of moves exceeded\n");
+      fclose(logfile);
       exit(11);
     case AM_SERVER_TIMEOUT:
       fprintf(logfile,"Exited with status 12, server has timed out or serve\n");
       printf("Exited with status 12, server has timed out or serve\n");
+      fclose(logfile);
       exit(12);
      default :
        fprintf(logfile, "Communication error with server\n");
        printf("Communication error with server\n");
+        fclose(logfile);
   }
   exit(0);
 }
@@ -370,8 +382,7 @@ int recv_init_response(int comm_sock, AM_Message *init_response) {
 * clean_up: frees all mallocs allocated in AMStartup
 * closes logfile, the common socket, frees the thread's data, and frees the maze
 */
-void clean_up(FILE *logfile, int comm_sock, thread_data_t **params, int num_avatars) {
-  fclose(logfile);
+void clean_up(int comm_sock, thread_data_t **params, int num_avatars) {
   close(comm_sock);
   for (int i = 0; i < num_avatars; i++) {
     if (params[i] != NULL) {
