@@ -22,6 +22,10 @@ specs about design can be found in the design.pdf file.
 * -d difficultyMaze - difficulty of the maze
  * must be an int 
  * must lie in range specified at server with hostname (in case of flume.cs.dartmouth.edu: 0 <= difficultyMaze <= 9
+* -h hostname
+ * should be flume.cs.dartmouth.edu
+ * any other hostname that we cannot connect to will return an error 
+* Any other options included will return an error, and exit with status of 10 
 
 ## Exit Statuses 
 Exit Statuses:     
@@ -48,6 +52,9 @@ Exit Statuses:
 
 *see design.pdf for more info about each module* 
 
+
+
+## Setting up the Repo 
 create new repository:
 
 - git clone https://gitlab.cs.dartmouth.edu/benjihannam/maze.git
