@@ -26,11 +26,8 @@
 #include <unistd.h>
 #include "thread_ops.h"
 #include "../lib/mazestruct.h"
-#include "../gui/mazedrawer.h"
 
-/************ local function prototypes ************/
-//int generate_avatars(int num_avatars, int maze_port, char *host_name);
-
+/************************* local function prototypes **********************/
 static int run_avatar_thread(int avatar_id, mazestruct_t *maze, int maze_port,
 	char *hostname);
 static Avatar *initialize_avatar(int id);
@@ -41,11 +38,11 @@ void wait_for_response(int comm_sock, AM_Message *msg_buff);
 static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
  	AM_Message *msg_buff);
 
-/******************** external global declarations ****************/
+/********************* external global declarations *********************/
 extern mazestruct_t *maze;
 extern pthread_mutex_t my_turn;
 
-/**************** avatar_thread ****************/
+/*************************** avatar_thread ******************************/
 void *avatar_thread(void *params) {
   thread_data_t *thread_data = (thread_data_t *)params;
 
@@ -55,12 +52,12 @@ void *avatar_thread(void *params) {
   pthread_exit(NULL);
 }
 
-/**************** run_avatar_thread ****************/
+/************************** run_avatar_thread **************************/
 static int run_avatar_thread(int avatar_id, mazestruct_t *maze, int maze_port,
 	char *hostname) {
 
     //declarations
-    int ret_status = 1;
+    int ret_status = SUCCESS;
     int comm_sock;
 
     //initialize needed structs
@@ -68,7 +65,8 @@ static int run_avatar_thread(int avatar_id, mazestruct_t *maze, int maze_port,
     Avatar *my_avatar = initialize_avatar(avatar_id);
 
     if (msg_buff == NULL || my_avatar == NULL) {
-	     perror("Malloc error. Thread couldn't be created.\n");
+	     fprintf(stderr, "Due to malloc error, avatar %d couldn't contact"
+		     " server.\n", avatar_id);
 	      ret_status = MALLOC_ERROR;
     }
     else if ((ret_status = connect_to_server(&comm_sock, hostname, maze_port)
@@ -102,7 +100,6 @@ static Avatar *initialize_avatar(int id) {
     else {
 	     avatar->fd = id;
 	     avatar->leader = id;
-	     printf("avatar leader: %d\n", avatar->leader);
 	      return avatar;
     }
  }
@@ -146,7 +143,6 @@ static int connect_to_server(int *comm_sock, char *hostname, int maze_port) {
     	perror("Connection to server failed.\n");
     	return FAILED_CONNECTION;
     }
-    printf("Connected to server.\n");
     return SUCCESS;
 }
 
@@ -178,6 +174,7 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 
     int ret_status;
 
+    //wait for initial response from server
     wait_for_response(comm_sock, msg_buff);
     if(ntohl(msg_buff->type) == AM_AVATAR_TURN) {
 	//update avatar position based on response
@@ -186,9 +183,6 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 	pthread_mutex_lock(&my_turn);
 	place_avatar(maze, my_avatar->pos.x, my_avatar->pos.y, my_avatar->fd);
 	pthread_mutex_unlock(&my_turn);
-    }
-    else {
-        printf("Message type is: %d\n", ntohl(msg_buff->type));
     }
 
     //try to solve the maze
@@ -204,7 +198,7 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 	}
     }
 
-    // once loop is ended, either maze has been solved or an error occured
+    // if loop has ended, either maze has been solved or an error occured
     switch (ntohl(msg_buff->type)) {
 	case (AM_MAZE_SOLVED):
 	    print_solved(maze);

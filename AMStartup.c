@@ -37,9 +37,10 @@
 #include <time.h>
 #include "lib/amazing.h"
 #include "thread_ops/thread_ops.h"
-#include "gui/mazedrawer.h"
 
-#define GUI
+#ifdef GUI
+#include "gui/mazedrawer.h"
+#endif
 
 /******************** function prototypes ******************/
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server);

@@ -307,7 +307,6 @@ void maze_print(mazestruct_t *maze){
 		}
 		printf("\n");
 	}
-	printf("Number of leaders: %d\n", maze->number_leaders);
 }
 
 /**************** did_x_visit() ****************/

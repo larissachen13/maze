@@ -1,33 +1,48 @@
-# Makefile for maze
+# Makefile for maze client program
 #
 # Larissa Chen August 2016
 # Team core_dumped_in_a_maze
 
-PROG = AMStartup
-OBJS = AMStartup.o ./thread_ops/thread_ops.o
-LLIBS = ./lib/lib.a ./gui/gui.a
+# programs
+PROG = AMStartup 	# program w/ just ASCII GUI
+GTK = AMStartupgtk 	# program w/ GTK GUI
 
-CFLAGS = -Wall -pedantic -std=c11 -ggdb -lpthread `pkg-config --cflags --libs gtk+-2.0`
+# .o files for each program
+OBJS = AMStartup.o ./thread_ops/thread_ops.o
+GTKOBJS = AMStartupgtk.o ./thread_ops/thread_ops.o
+
+# libraries
+LLIBS = ./lib/lib.a 
+GTKLIBS = ./gui/gui.a
+
+# commands and switches
 CC = gcc
 MAKE = make
+CFLAGS = -Wall -pedantic -std=c11 -ggdb -lpthread
+GTKFLAGS = $(CFLAGS) -DGUI `pkg-config --cflags --libs gtk+-2.0`
 
-# build the maze
+# build the maze client program without graphics
 $(PROG): $(OBJS) $(LLIBS)
 	$(CC) $(CFLAGS) $^ -o $@
 
-AMStartupgtk: $(OBJS) $(LLIBS)
-	$(CC) $(CFLAGS) -DGUI $^ -o $@ 
+# build the maze client program with graphics
+$(GTK): $(GTKOBJS) $(LLIBS) $(GTKLIBS)
+	$(CC) $(GTKFLAGS) $^ -o $@ 
 
-# maze source dependencies; add others as needed
-AMStartup.o: ./thread_ops/thread_ops.h ./gui/mazedrawer.h
+# source dependencies
+AMStartup.o: ./thread_ops/thread_ops.h 
 ./thread_ops/thread_ops.o: ./thread_ops/thread_ops.h ./lib/mazestruct.h
 
+# source dependency for graphics version
+AMStartupgtk.o: ./thread_ops/thread_ops.h ./gui/mazedrawer.h
+	$(CC) $(GTKFLAGS) -c AMStartup.c -o $@
+
 # build the library
-./lib/lib.a:
+./lib/lib.a: 
 	cd ./lib; $(MAKE)
 
 #build the gui library
-./gui/gui.a:
+./gui/gui.a: 
 	cd ./gui; $(MAKE)
 
 .PHONY: clean
@@ -40,5 +55,6 @@ clean:
 	rm -f vgcore.*
 	rm -f $(PROG)
 	rm -f AMStartupgtk
+	rm -f thread_ops/*.o
 	cd ./lib; $(MAKE) clean
 	cd ./gui; $(MAKE) clean

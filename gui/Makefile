@@ -14,6 +14,7 @@ $(LIB): $(OBJS)
 	ar cr $@ $^
 
 mazedrawer.o: mazedrawer.h
+	$(CC) $(CFLAGS) -c mazedrawer.c -o $@ 
 
 # add cleanup commands for other subdirectories
 .PHONY: clean
