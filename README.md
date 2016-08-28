@@ -83,8 +83,9 @@ Exit Statuses:
 * **test_scripts**: holds testing scripts 
 * **gui**: holds module and program that draws the GTK maze interface 
 * **results**: results directory with log of successful runs, all runs with -n 4 with difficulty ranging from 0 to 9
+* core-dumped-in-a-maze-design.pdf: specifies algorithm logic and more info about each module
 
-*see design.pdf for more info about each module* 
+*see core-dumped-in-a-maze-design.pdf for more info about each module* 
 
 ## Testing 
 Refer to `TESTING.md` for further testing instructions 
