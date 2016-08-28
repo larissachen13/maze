@@ -858,7 +858,7 @@ int get_number_leaders(mazestruct_t *maze){
 		return maze->number_leaders;
 	}
 	else{
-		return NULL;
+		return -1;
 	}
 }
 

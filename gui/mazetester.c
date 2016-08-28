@@ -12,6 +12,7 @@ int main(int argc, char *argv[]){
 	mazestruct_t *maze = maze_new(50, 50, 4, NULL);
 
 	maze_drawer(maze);
+
 }
 
 //gcc mazetester.c -o mazetester ../lib/mazestruct.c mazedrawer.c `pkg-config --cflags --libs gtk+-2.0`

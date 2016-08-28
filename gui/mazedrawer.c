@@ -22,7 +22,7 @@ gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data
 gboolean time_handler(GtkWidget *widget);
 
 
-
+int x = 0;
 
 /*
 *
@@ -97,6 +97,8 @@ gboolean time_handler(GtkWidget *widget) {
     return false;
   }
 
+  x = x+1;
+
   gtk_widget_queue_draw(widget);
   
   return true;
@@ -123,7 +125,7 @@ void* maze_drawer(void *maze_in){
   gtk_window_set_default_size(GTK_WINDOW(window), WINDOW_HEIGHT, WINDOW_WIDTH);
 
   gtk_window_set_title(GTK_WINDOW(window), "Maze Drawer");
-  g_timeout_add(166, (GSourceFunc) time_handler, (gpointer) window);
+  g_timeout_add(10, (GSourceFunc) time_handler, (gpointer) window);
   gtk_widget_show_all(window);
   time_handler(window);
 
