@@ -48,7 +48,7 @@ void *avatar_thread(void *params) {
 
   *(thread_data->return_status) = run_avatar_thread(thread_data->id, maze,
 	  thread_data->maze_port, thread_data->host_name);
-  
+
   pthread_exit(NULL);
 }
 
@@ -190,6 +190,9 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 	//if it is your turn...
 	if (ntohl(msg_buff->avatar_turn.TurnId) == my_avatar->fd) {
 	    pthread_mutex_lock(&my_turn); //make sure no one else can go
+			#ifdef SLEEP
+				sleep(1); 
+			#endif
 	    make_move(maze, my_avatar, comm_sock, msg_buff);
 	    pthread_mutex_unlock(&my_turn); //allow next person to go
 	}

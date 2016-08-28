@@ -2,6 +2,7 @@ core.*
 *.o
 AMStartup
 AMStartupgtk
+AMStartupsleep
 gui/gui.a
 lib/lib.a
 Amazing*

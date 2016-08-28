@@ -34,3 +34,9 @@ echo -en "\nAMStartup -n 1 -d -1 -h flume.cs.dartmouth.edu\n"
 
 echo -en "\nAMStartup -n 1 -d 11 -h flume.cs.dartmouth.edu\n"
 ./AMStartup -d 11 -n 1 -h flume.cs.dartmouth.edu
+
+# invalid host name
+echo -en "\n\nINVALID HOSTNAME\n"
+echo -en "-----------------------------------------------------"
+echo -en "\nAMStartup -n 1 -d 1 -h foo.edu\n"
+./AMStartup -d 1 -n 1 -h foo.edu
