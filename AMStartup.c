@@ -19,6 +19,8 @@
  *            8 - invalid number of avatars
  *            9 - invalid difficulty number
  *            10 - missing argument or invalid option argument
+ *            11 - max number of moves is exceeded
+ *            12 - server times out
  *
  * Larissa Chen, August 2016
  * Team: core_dumped_in_a_maze
@@ -217,34 +219,49 @@ int main (int argc, char* argv[]) {
   // 9. Parse exit codes and exit
   switch(exit_code) {
      case 0 :
-        printf("Thread status: 0 Success!\n");
+        printf("Exited with status 0, maze was solved\n");
         exit(0);
         break;
      case 1 :
-        printf("Thread status: 1 Failure!\n");
+        printf("Exited with status 1, Server ran out of disk memory\n");
         exit(1);
         break;
      case 2 :
-      exit(3);
+      printf("Exited with status 2, unclear error\n");
+      exit(2);
       break;
      case 3 :
+      printf("Exited with status 3, malloc error\n");
       exit(3);
       break;
      case 4 :
+      printf("Exited with status 4, socket could not be created\n");
       exit(4);
       break;
      case 5 :
+      printf("Exited with status 5, unknown hostname\n");
       exit(5);
       break;
      case 6 :
+      printf("Exited with status 6, failed connected to socket\n");
       exit(6);
       break;
      case 7 :
+      printf("Exited with status 7, messaged failed to be written or read\n");
       exit (7);
+      break;
      case 8 :
+      printf("Exited with status 8, avatar could not be created\n");
       exit(8);
+      break;
+    case AM_TOO_MANY_MOVES:
+      printf("Exited with status 11, max number of moves exceeded\n");
+      exit(11);
+    case AM_SERVER_TIMEOUT:
+      printf("Exited with status 12, server has timed out or serve\n");
+      exit(12);
      default :
-       printf("Unknown return status from threads\n");
+       printf("Communication error with server\n");
   }
   exit(0);
 }
@@ -293,13 +310,14 @@ int send_init_message(int n_avatars, int difficulty, int comm_sock, struct socka
 */
 int recv_init_response(int comm_sock, AM_Message *init_response) {
   int bytes_read;
-
+  // read message
   if ((bytes_read = read(comm_sock, init_response, sizeof(AM_Message))) < 0)
     perror("reading stream message");
   else if (bytes_read == 0) {
     printf("Ending connection\n");
     return 1;
   }
+  // check if message returns an error
   else  {
     if (IS_AM_ERROR(ntohl(init_response->type))) {
       int error = ntohl(init_response->init_failed.ErrNum);
@@ -315,6 +333,10 @@ int recv_init_response(int comm_sock, AM_Message *init_response) {
   return 0;
 }
 
+/*
+* clean_up: frees all mallocs allocated in AMStartup
+* closes logfile, the common socket, frees the thread's data, and frees the maze
+*/
 void clean_up(FILE *logfile, int comm_sock, thread_data_t **params, int num_avatars) {
   fclose(logfile);
   close(comm_sock);
@@ -323,7 +345,6 @@ void clean_up(FILE *logfile, int comm_sock, thread_data_t **params, int num_avat
       free(params[i]->return_status);
       free(params[i]);
     }
-
   }
   delete_maze(maze);
 }
