@@ -218,4 +218,18 @@ bool is_dead(mazestruct_t *maze, int x, int y, int direction);
 */
 void print_solved(mazestruct_t *maze);
 
+/**************** get_height() ****************/
+/*
+* Returns the height of the maze
+*
+*/
+int get_height(mazestruct_t *maze);
+
+/**************** has_avatar() ****************/
+/*
+* Returns if a spot has an avatar
+*
+*/
+bool has_avatar(mazestruct_t *maze, int x, int y);
+
 #endif
