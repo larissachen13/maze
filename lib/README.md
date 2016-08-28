@@ -1,9 +1,9 @@
 # Library 
 
-## Data Structures: 
-
-##Avatar Struct
-#####Important Members: 
+## Data Structures:    
+       
+##Avatar Struct      
+#####Important Members:      
 * id
 * (x, y) position 
 
@@ -17,16 +17,16 @@
 * `update_leader`
 
 
-     
-## Mazestruct 
-#####Important Members: 
+         
+## Mazestruct         
+#####Important Members:         
 * array of all the slots in the maze
 * height, width
 * number of avatars
 * number of moves 
 * is_solved boolean 
-
-#####Important Methods 
+    
+#####Important Methods    
 * `maze_new`
 * `maze_print`
 * `place_avatar`
