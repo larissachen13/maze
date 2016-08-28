@@ -11,11 +11,14 @@ CFLAGS = -Wall -pedantic -std=c11 -ggdb -lpthread `pkg-config --cflags --libs gt
 CC = gcc
 MAKE = make
 
-# build the crawler
+# build the maze
 $(PROG): $(OBJS) $(LLIBS)
 	$(CC) $(CFLAGS) $^ -o $@
 
-# crawler source dependencies; add others as needed
+AMStartupgtk: $(OBJS) $(LLIBS)
+	$(CC) $(CFLAGS) -DGUI $^ -o $@ 
+
+# maze source dependencies; add others as needed
 AMStartup.o: ./thread_ops/thread_ops.h ./gui/mazedrawer.h
 ./thread_ops/thread_ops.o: ./thread_ops/thread_ops.h ./lib/mazestruct.h
 
@@ -36,5 +39,6 @@ clean:
 	rm -f core.*
 	rm -f vgcore.*
 	rm -f $(PROG)
+	rm -f AMStartupgtk
 	cd ./lib; $(MAKE) clean
 	cd ./gui; $(MAKE) clean

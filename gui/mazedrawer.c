@@ -117,7 +117,7 @@ gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data
 
       if(has_avatar(maze, i, j)){
         cairo_set_source_rgb(cr, 1, 0, 0);
-        cairo_rectangle(cr, i*spot_height + 6 + indent, j*spot_height + 6 + indent, spot_height - 10, spot_height - 10);
+        cairo_rectangle(cr, i*spot_height + 3 + indent, j*spot_height + 3 + indent, spot_height - 4, spot_height - 4);
         cairo_fill(cr);
       }
 

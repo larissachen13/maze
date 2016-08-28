@@ -224,6 +224,5 @@ static int solve_maze(Avatar *my_avatar, mazestruct_t *maze, int comm_sock,
 		ret_status = UNCLEAR;
 	    }
     }
-    printf(" solve ret: %d\n", ret_status);
     return ret_status;
 }

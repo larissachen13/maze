@@ -811,7 +811,6 @@ void delete_maze(mazestruct_t *maze){
 		maze->move_count++;
 		//print the total number of moves
 		printf("TOTAL NUMBER OF MOVES: %d\n", maze->move_count);
-		printf("Number of leaders: %d\n", maze->number_leaders);
 
 		//go through each spot and free the memory associated with it
 		for (int i = 0; i < maze->width; i++){

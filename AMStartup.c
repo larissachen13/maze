@@ -39,6 +39,8 @@
 #include "thread_ops/thread_ops.h"
 #include "gui/mazedrawer.h"
 
+#define GUI
+
 /******************** function prototypes ******************/
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server);
 int recv_init_response(int comm_sock, AM_Message *init_response);
@@ -171,7 +173,11 @@ int main (int argc, char* argv[]) {
 
   // initialization before creating threads
   pthread_t avatars[AM_MAX_AVATAR];
+
+  #ifdef GUI
   pthread_t gui;
+  #endif
+
   thread_data_t *params[n];
   if (pthread_mutex_init(&my_turn, NULL) != 0) {
       perror("Mutex creation failed.\n");
@@ -186,13 +192,14 @@ int main (int argc, char* argv[]) {
   }
   else {
 
+#ifdef GUI
 // 6.1 Create the gui thread
       if (pthread_create(&gui, NULL, maze_drawer, maze) != 0) {
          fprintf(stderr, "Thread for gui could not be created.\n");
          exit(7);
       }
       sleep(5);
-
+#endif
 // 6.2 Start the avatar threads
     for (int i = 0; i < n; i++) {
 
@@ -213,7 +220,9 @@ int main (int argc, char* argv[]) {
       for (int i = 0; i < n; i++) {
          pthread_join(avatars[i], NULL);
       }
+      #ifdef GUI
       pthread_join(gui, NULL);
+      #endif
   }
 
   int exit_code;
