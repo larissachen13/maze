@@ -39,6 +39,7 @@
 /******************** function prototypes ******************/
 int send_init_message(int n_avatars, int difficulty, int comm_sock, struct sockaddr_in server);
 int recv_init_response(int comm_sock, AM_Message *init_response);
+void clean_up(FILE *logfile, int comm_sock, thread_data_t **params, int num_avatars);
 
 /******************** global variables **********************/
 mazestruct_t *maze;
@@ -55,8 +56,8 @@ bool avatars_unite = false;
  * 5. Initializes log file and new maze struct
  * 6. Sets up nAvatar number of threads
  * 7. Pass control to thread_ops to handle each avatar thread and solve the maze
- * 8. Parse exit codes from thread_ops
- * 9. Clean up
+ * 8. Clean up before exiting
+ * 9. Parse exit codes from thread_ops and exit
  */
 int main (int argc, char* argv[]) {
   char opt;
@@ -157,7 +158,7 @@ int main (int argc, char* argv[]) {
   maze_width = ntohl(init_response.init_ok.MazeWidth);
   maze_height = ntohl(init_response.init_ok.MazeHeight);
 
-  // 5. Create log file and print the first line 
+  // 5. Create log file and print the first line
   const int len = 400; // fix this
   char filename[len];
   snprintf(filename, len, "Amazing_%s_%d_%d.log", getenv("USER"), n, d);
@@ -166,10 +167,8 @@ int main (int argc, char* argv[]) {
   fprintf(logfile, "%s, %d, %s*************************\n", getenv("USER"), maze_port,ctime(&date));
 
   // initialization before creating threads
-  int kk = 1;
-  void *thread_status = &kk;
   pthread_t avatars[AM_MAX_AVATAR];
-  thread_data_t *params;
+  thread_data_t *params[n];
   if (pthread_mutex_init(&my_turn, NULL) != 0) {
       perror("Mutex creation failed.\n");
       close(comm_sock);
@@ -187,24 +186,36 @@ int main (int argc, char* argv[]) {
     for (int i = 0; i < n; i++) {
 
     // generate params to pass into each thread
-      params = malloc(sizeof(thread_data_t));
-      params->maze_port = maze_port;
-      params->host_name = hostname;
-      params->id = i;
+      params[i] = malloc(sizeof(thread_data_t));
+      params[i]->maze_port = maze_port;
+      params[i]->host_name = hostname;
+      params[i]->id = i;
+      params[i]->return_status =malloc(sizeof(int));
 
   // 7. Pass control to thread_ops module through function avatar_thread
-      if (pthread_create(&avatars[i], NULL, avatar_thread, params) != 0) {
+      if (pthread_create(&avatars[i], NULL, avatar_thread, params[i]) != 0) {
 	       fprintf(stderr, "Thread for avatar %d could not be created.\n", i);
          exit(7);
       }
     }
       for (int i = 0; i < n; i++) {
-	       pthread_join(avatars[i], thread_status);
+	       pthread_join(avatars[i], NULL);
       }
   }
 
-  // 8. Parse exit codes from thread_ops
-  switch(*(int *)thread_status) {
+  int exit_code;
+  for (int i= 0; i < n; i++) {
+    exit_code = *params[i]->return_status;
+    if (exit_code != 0) {
+      break;
+    }
+  }
+
+  // 8. Clean up
+  clean_up(logfile, comm_sock, params, n);
+
+  // 9. Parse exit codes and exit
+  switch(exit_code) {
      case 0 :
         printf("Thread status: 0 Success!\n");
         exit(0);
@@ -235,13 +246,6 @@ int main (int argc, char* argv[]) {
      default :
        printf("Unknown return status from threads\n");
   }
-
-  // 9. Clean up
-  if (thread_status != NULL)
-    free(thread_status);
-  fclose(logfile);
-  delete_maze(maze);
-  close(comm_sock);
   exit(0);
 }
 
@@ -309,4 +313,17 @@ int recv_init_response(int comm_sock, AM_Message *init_response) {
     }
   }
   return 0;
+}
+
+void clean_up(FILE *logfile, int comm_sock, thread_data_t **params, int num_avatars) {
+  fclose(logfile);
+  close(comm_sock);
+  for (int i = 0; i < num_avatars; i++) {
+    if (params[i] != NULL) {
+      free(params[i]->return_status);
+      free(params[i]);
+    }
+
+  }
+  delete_maze(maze);
 }

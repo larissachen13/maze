@@ -2,7 +2,7 @@
 * thread_ops.h header file for the threads module
 *
 *
-* Larissa Chen, July 2016
+* Larissa Chen, August 2016
 * Team: core_dumped_in_a_maze
 */
 #include "../lib/amazing.h"
@@ -17,6 +17,7 @@ typedef struct thread_data {
     int id;
     int maze_port;
     char *host_name;
+    int *return_status; 
 } thread_data_t;
 
 /**************** generate_avatars ****************/
